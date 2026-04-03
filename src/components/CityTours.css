@@ -1,0 +1,272 @@
+/* CITY TOURS MAIN CONTAINER */
+.city-tours {
+  background-color: var(--color-ivory);
+}
+
+/* SECTION 1: HERO */
+.city-hero {
+  height: 60vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  background-color: var(--color-earth);
+  color: white;
+  overflow: hidden;
+}
+
+.city-hero-content {
+  position: relative;
+  z-index: 10;
+  max-width: 800px;
+}
+
+.accent-line {
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: var(--color-gold);
+  margin-bottom: 2rem;
+}
+
+.city-hero h2 {
+  font-size: clamp(3rem, 6vw, 4.5rem);
+  color: white;
+  margin-bottom: 1.5rem;
+}
+
+.city-hero p {
+  font-size: 1.25rem;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+/* SECTION 2: DESTINATIONS GRID */
+.city-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3rem;
+}
+
+.city-card {
+  background: white;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+  transition: var(--transition-smooth);
+}
+
+.city-card:hover {
+  transform: translateY(-10px);
+}
+
+.city-card-image {
+  height: 350px;
+  position: relative;
+  overflow: hidden;
+}
+
+.city-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.duration-badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: var(--color-slate-bronze);
+  color: white;
+  padding: 6px 15px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.city-card-content {
+  padding: 2.5rem;
+}
+
+.city-label {
+  color: var(--color-slate-bronze);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.city-card h3 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.tagline {
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-bottom: 1.5rem;
+  font-style: italic;
+}
+
+.city-highlights {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 2rem;
+  opacity: 0.8;
+  font-size: 0.9rem;
+}
+
+.city-highlights li::before {
+  content: '•';
+  color: var(--color-gold);
+  margin-right: 8px;
+}
+
+.city-best {
+  font-size: 0.9rem;
+  margin-bottom: 2rem;
+}
+
+.city-best span {
+  font-weight: 700;
+  color: var(--color-earth);
+}
+
+.city-explore {
+  font-weight: 700;
+  color: var(--color-gold);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* SECTION 3: PACKAGES */
+.package-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+}
+
+.package-card {
+  background: white;
+  padding: 3rem;
+  border: 1px solid #eee;
+  border-radius: var(--border-radius);
+  display: flex;
+  flex-direction: column;
+}
+
+.pkg-duration {
+  background: var(--color-gold);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  display: inline-block;
+}
+
+.pkg-price {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 1.5rem 0;
+  color: var(--color-earth);
+}
+
+.pkg-price .from { font-size: 1rem; font-weight: 400; color: #999; }
+.pkg-price .pp { font-size: 0.9rem; font-weight: 600; color: #666; }
+
+.pkg-includes {
+  list-style: none;
+  margin-bottom: 2rem;
+  flex-grow: 1;
+}
+
+.pkg-includes li {
+  margin-bottom: 10px;
+  color: var(--color-text-muted);
+}
+
+.pkg-stops {
+  font-size: 0.9rem;
+  margin-bottom: 2.5rem;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 4px;
+}
+
+.pkg-btns {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.btn-text {
+  font-weight: 700;
+  color: var(--color-earth);
+  font-size: 0.85rem;
+}
+
+/* SECTION 4: COMBO BANNER */
+.combo-banner {
+  background-color: var(--color-earth);
+  color: white;
+  text-align: center;
+  padding: 100px 0;
+}
+
+.combo-content h2 { color: white; font-size: 3rem; margin-bottom: 1.5rem; }
+.combo-content p { max-width: 800px; margin: 0 auto 4rem; opacity: 0.8; font-size: 1.2rem; }
+
+.combo-visual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 3rem;
+  margin-bottom: 4rem;
+}
+
+.combo-step {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.combo-step .icon { font-size: 2.5rem; }
+.combo-step span { font-weight: 700; text-transform: uppercase; letter-spacing: 2px; }
+.combo-arrow { font-size: 1.5rem; color: var(--color-gold); }
+
+/* SECTION 5: EXPERIENCES GRID */
+.exp-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+}
+
+.exp-item {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.exp-icon { font-size: 2rem; }
+.exp-text h4 { font-size: 1.1rem; margin-bottom: 5px; }
+.exp-text p { font-size: 0.9rem; color: var(--color-text-muted); line-height: 1.4; }
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+  .city-grid, .package-grid { grid-template-columns: 1fr; }
+  .exp-grid { grid-template-columns: repeat(2, 1fr); }
+  .combo-visual { gap: 1.5rem; }
+}
+
+@media (max-width: 600px) {
+  .exp-grid { grid-template-columns: 1fr; }
+  .combo-visual { flex-direction: column; gap: 1rem; }
+  .combo-arrow { display: none; }
+}
