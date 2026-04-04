@@ -19,7 +19,9 @@ export const PersistentBar = () => {
 
       {/* Floating Button */}
       <a 
-        href="#" 
+        href="https://wa.me/254718592358?text=Hi%20Savanna%20%26%20Beyond,%20I'd%20like%20to%20inquire%20about%20a%20safari."
+        target="_blank"
+        rel="noopener noreferrer"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className="w-16 h-16 bg-gold text-charcoal rounded-full flex items-center justify-center shadow-[0_10px_40px_rgba(197,160,89,0.4)] hover:bg-white hover:scale-110 transition-all duration-500 group-hover:rotate-12"
