@@ -1,51 +1,34 @@
-import React, { useEffect } from 'react';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import Destinations from './components/Destinations';
-import Wildlife from './components/Wildlife';
-import CityTours from './components/CityTours';
-import Accommodation from './components/Accommodation';
-import Packages from './components/Packages';
-import BookingForm from './components/BookingForm';
-import Footer from './components/Footer';
+import React from 'react'
+import { Navbar } from './components/Navbar'
+import { Hero } from './components/Hero'
+import { TrustBar } from './components/TrustBar'
+import { Packages } from './components/Packages'
+import { AddOns } from './components/AddOns'
+import { Destinations } from './components/Destinations'
+import { WildlifeTracker } from './components/WildlifeTracker'
+import { Stays } from './components/Stays'
+import { SocialProof } from './components/SocialProof'
+import { EnquiryEngine } from './components/EnquiryEngine'
+import { Footer } from './components/Footer'
+import { PersistentBar } from './components/PersistentBar'
 
 function App() {
-  const [preSelectedPackage, setPreSelectedPackage] = React.useState('');
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const reveals = document.querySelectorAll('.reveal');
-      for (let i = 0; i < reveals.length; i++) {
-        const windowHeight = window.innerHeight;
-        const revealTop = reveals[i].getBoundingClientRect().top;
-        const revealPoint = 150;
-        if (revealTop < windowHeight - revealPoint) {
-          reveals[i].classList.add('active');
-        }
-      }
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initial check
-    
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   return (
-    <div className="App">
+    <div className="relative">
       <Navbar />
-      <main>
-        <Hero />
-        <Destinations />
-        <Wildlife />
-        <CityTours />
-        <Accommodation />
-        <Packages setPreSelectedPackage={setPreSelectedPackage} />
-        <BookingForm preSelectedPackage={preSelectedPackage} />
-      </main>
+      <Hero />
+      <TrustBar />
+      <Packages />
+      <AddOns />
+      <Destinations />
+      <WildlifeTracker />
+      <Stays />
+      <SocialProof />
+      <EnquiryEngine />
       <Footer />
+      <PersistentBar />
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

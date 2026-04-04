@@ -1,49 +1,68 @@
 import React from 'react';
-import './Footer.css';
+import { Camera, Globe, Share2 } from 'lucide-react';
 
-const Footer = () => {
+export const Footer = () => {
   return (
-    <footer className="footer">
-      <div className="container">
-        <div className="footer-grid">
-          <div className="footer-brand">
-            <div className="logo white">
-              <span className="logo-text">Savanna<span>&Beyond</span></span>
+    <footer className="bg-charcoal text-white pt-24 pb-12 border-t border-white/5">
+      <div className="max-w-[1280px] mx-auto px-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
+          
+          <div className="flex flex-col gap-6">
+            <a href="#" className="font-heading text-3xl font-bold text-ivory">
+              Savanna<span className="text-ochre">&Beyond</span>
+            </a>
+            <p className="text-zinc-400 text-sm leading-relaxed max-w-[250px]">
+              Crafting honest, expert-guided journeys into the heart of Kenya. No middlemen. Just the plains.
+            </p>
+            <div className="flex gap-4 mt-2">
+              <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-ochre transition-all"><Camera size={18} /></a>
+              <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-ochre transition-all"><Globe size={18} /></a>
+              <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-ochre transition-all"><Share2 size={18} /></a>
             </div>
-            <p>Crafting extraordinary journeys into the heart of Kenya's untamed wilderness. Committed to conservation and luxury.</p>
           </div>
-          
-          <div className="footer-links">
-            <h4>Explore</h4>
-            <ul>
-              <li><a href="#destinations">Our Destinations</a></li>
-              <li><a href="#wildlife">The Big Five</a></li>
-              <li><a href="#accommodation">Luxury Stays</a></li>
-              <li><a href="#booking">Book Your Safari</a></li>
-            </ul>
+
+          <div>
+             <h4 className="font-heading text-xl text-sand uppercase tracking-widest mb-6 font-semibold">Explore</h4>
+             <ul className="space-y-4 text-sm text-zinc-400">
+                <li><a href="#" className="hover:text-ochre">Destinations</a></li>
+                <li><a href="#" className="hover:text-ochre">Wildlife Spotlight</a></li>
+                <li><a href="#" className="hover:text-ochre">Safari Packages</a></li>
+                <li><a href="#" className="hover:text-ochre">City Tours</a></li>
+                <li><a href="#" className="hover:text-ochre">Luxury Stays</a></li>
+             </ul>
           </div>
-          
-          <div className="footer-newsletter">
-            <h4>The Safari Journal</h4>
-            <p>Subscribe to receive stories from the savanna and exclusive offers.</p>
-            <form className="newsletter-form">
-              <input type="email" placeholder="Your Email Address" />
-              <button type="submit" className="btn-primary">Subscribe</button>
-            </form>
+
+          <div>
+             <h4 className="font-heading text-xl text-sand uppercase tracking-widest mb-6 font-semibold">Plan</h4>
+             <ul className="space-y-4 text-sm text-zinc-400">
+                <li><a href="#" className="hover:text-ochre">How It Works</a></li>
+                <li><a href="#" className="hover:text-ochre">Trip Add-Ons</a></li>
+                <li><a href="#" className="hover:text-ochre">Group Bookings</a></li>
+                <li><a href="#" className="hover:text-ochre">Custom Itineraries</a></li>
+                <li><a href="#" className="hover:text-ochre">FAQs</a></li>
+             </ul>
+          </div>
+
+          <div>
+             <h4 className="font-heading text-xl text-sand uppercase tracking-widest mb-6 font-semibold">Company</h4>
+             <ul className="space-y-4 text-sm text-zinc-400">
+                <li><a href="#" className="hover:text-ochre">About Us</a></li>
+                <li><a href="#" className="hover:text-ochre">Conservation Impact</a></li>
+                <li><a href="#" className="hover:text-ochre">Our Guides</a></li>
+                <li><a href="#" className="hover:text-ochre">Travel Blog</a></li>
+                <li><a href="#" className="hover:text-ochre">Contact Us</a></li>
+             </ul>
           </div>
         </div>
-        
-        <div className="footer-bottom">
-          <p>© 2026 Savanna & Beyond Expeditions. All Rights Reserved.</p>
-          <div className="footer-social">
-            <a href="#">Instagram</a>
-            <a href="#">Facebook</a>
-            <a href="#">Twitter</a>
-          </div>
+
+        <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-[11px] uppercase tracking-widest text-zinc-500 font-bold">
+           <span>&copy; 2026 Savanna & Beyond Expeditions Ltd. Nairobi, Kenya. Licensed by KATO.</span>
+           <div className="flex gap-8">
+              <a href="#" className="hover:text-ivory">Privacy Policy</a>
+              <a href="#" className="hover:text-ivory">Booking Terms</a>
+           </div>
         </div>
       </div>
     </footer>
   );
 };
-
-export default Footer;
