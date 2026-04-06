@@ -12,13 +12,25 @@ dist
 dist-ssr
 *.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# OS files
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+Thumbs.db
+
+# Firebase specific
+.firebase/
+firebase-debug.log*
+.runtimeconfig.json
+*.local.json
+
+# Service Accounts
+*.json
+!package.json
+!tsconfig.json
+!firebase.json

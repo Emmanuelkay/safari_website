@@ -1,68 +1,83 @@
 import React from 'react';
-import { Camera, Globe, Share2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Camera, Globe, Share2 } from 'lucide-react';
 
 export const Footer = () => {
   return (
-    <footer className="bg-charcoal text-white pt-24 pb-12 border-t border-white/5">
-      <div className="max-w-[1280px] mx-auto px-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
+    <footer className="bg-charcoal text-ivory py-32 px-10 border-t border-gold/10">
+      <div className="max-w-[1440px] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-20">
           
-          <div className="flex flex-col gap-6">
-            <a href="#" className="font-heading text-3xl font-bold text-ivory">
-              Savanna<span className="text-ochre">&Beyond</span>
-            </a>
-            <p className="text-zinc-400 text-sm leading-relaxed max-w-[250px]">
-              Crafting honest, expert-guided journeys into the heart of Kenya. No middlemen. Just the plains.
+          {/* Brand & Mission */}
+          <div className="lg:col-span-5">
+            <h2 className="text-6xl font-heading mb-10 leading-tight">Savanna <br/> & Beyond</h2>
+            <p className="max-w-sm text-ivory/50 font-body text-sm leading-relaxed mb-12">
+              Nairobi-based, KWS-certified expedition company offering fully private Kenya safaris. Dedicated to conservation, local empowerment, and the quiet luxury of the wild.
             </p>
-            <div className="flex gap-4 mt-2">
-              <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-ochre transition-all"><Camera size={18} /></a>
-              <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-ochre transition-all"><Globe size={18} /></a>
-              <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-ochre transition-all"><Share2 size={18} /></a>
+            <div className="flex gap-6">
+               <div className="border border-ivory/10 px-4 py-2 rounded flex flex-col gap-1">
+                  <span className="text-[8px] font-bold text-gold uppercase tracking-widest">KWS License</span>
+                  <span className="text-[10px] font-bold text-ivory/40 uppercase">CERT-2026-942</span>
+               </div>
+               <div className="border border-ivory/10 px-4 py-2 rounded flex flex-col gap-1">
+                  <span className="text-[8px] font-bold text-gold uppercase tracking-widest">KATO Member</span>
+                  <span className="text-[10px] font-bold text-ivory/40 uppercase">REG-SNB-041</span>
+               </div>
             </div>
           </div>
 
-          <div>
-             <h4 className="font-heading text-xl text-sand uppercase tracking-widest mb-6 font-semibold">Explore</h4>
-             <ul className="space-y-4 text-sm text-zinc-400">
-                <li><a href="#" className="hover:text-ochre">Destinations</a></li>
-                <li><a href="#" className="hover:text-ochre">Wildlife Spotlight</a></li>
-                <li><a href="#" className="hover:text-ochre">Safari Packages</a></li>
-                <li><a href="#" className="hover:text-ochre">City Tours</a></li>
-                <li><a href="#" className="hover:text-ochre">Luxury Stays</a></li>
-             </ul>
+          {/* Quick Links */}
+          <div className="lg:col-span-2">
+            <h4 className="text-gold font-bold uppercase text-[11px] tracking-[0.3em] mb-10">Expeditions</h4>
+            <ul className="space-y-6 text-[13px] text-ivory/60 font-body">
+              <li><a href="#packages" className="hover:text-gold transition-colors">All Packages</a></li>
+              <li><a href="#destinations" className="hover:text-gold transition-colors">Our Destinations</a></li>
+              <li><a href="#wildlife" className="hover:text-gold transition-colors">Wildlife Guide</a></li>
+              <li><a href="#booking" className="hover:text-gold transition-colors">Private Hire</a></li>
+            </ul>
           </div>
 
-          <div>
-             <h4 className="font-heading text-xl text-sand uppercase tracking-widest mb-6 font-semibold">Plan</h4>
-             <ul className="space-y-4 text-sm text-zinc-400">
-                <li><a href="#" className="hover:text-ochre">How It Works</a></li>
-                <li><a href="#" className="hover:text-ochre">Trip Add-Ons</a></li>
-                <li><a href="#" className="hover:text-ochre">Group Bookings</a></li>
-                <li><a href="#" className="hover:text-ochre">Custom Itineraries</a></li>
-                <li><a href="#" className="hover:text-ochre">FAQs</a></li>
-             </ul>
+          {/* HQ & Contact */}
+          <div className="lg:col-span-3">
+            <h4 className="text-gold font-bold uppercase text-[11px] tracking-[0.3em] mb-10">Nairobi HQ</h4>
+            <div className="space-y-8 text-[13px] text-ivory/60 font-body">
+              <div className="flex items-start gap-4">
+                 <MapPin size={18} className="text-gold flex-shrink-0" />
+                 <p>Wilson Airport Plaza V, Tower B<br/>Langata Road, Nairobi, Kenya</p>
+              </div>
+              <div className="flex items-center gap-4">
+                 <Phone size={18} className="text-gold" />
+                 <p>+254 700 000 000</p>
+              </div>
+              <div className="flex items-center gap-4">
+                 <Mail size={18} className="text-gold" />
+                 <p>expeditions@savannabeyond.co.ke</p>
+              </div>
+            </div>
           </div>
 
-          <div>
-             <h4 className="font-heading text-xl text-sand uppercase tracking-widest mb-6 font-semibold">Company</h4>
-             <ul className="space-y-4 text-sm text-zinc-400">
-                <li><a href="#" className="hover:text-ochre">About Us</a></li>
-                <li><a href="#" className="hover:text-ochre">Conservation Impact</a></li>
-                <li><a href="#" className="hover:text-ochre">Our Guides</a></li>
-                <li><a href="#" className="hover:text-ochre">Travel Blog</a></li>
-                <li><a href="#" className="hover:text-ochre">Contact Us</a></li>
-             </ul>
+          {/* Social */}
+          <div className="lg:col-span-2">
+            <h4 className="text-gold font-bold uppercase text-[11px] tracking-[0.3em] mb-10">Journal</h4>
+            <div className="flex gap-6 text-ivory/40">
+               <a href="#" className="hover:text-gold transition-colors"><Camera size={20} /></a>
+               <a href="#" className="hover:text-gold transition-colors"><Globe size={20} /></a>
+               <a href="#" className="hover:text-gold transition-colors"><Share2 size={20} /></a>
+            </div>
           </div>
+
         </div>
 
-        <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-[11px] uppercase tracking-widest text-zinc-500 font-bold">
-           <span>&copy; 2026 Savanna & Beyond Expeditions Ltd. Nairobi, Kenya. Licensed by KATO.</span>
-           <div className="flex gap-8">
-              <a href="#" className="hover:text-ivory">Privacy Policy</a>
-              <a href="#" className="hover:text-ivory">Booking Terms</a>
-           </div>
+        {/* Bottom Bar */}
+        <div className="mt-32 pt-12 border-t border-ivory/5 flex flex-col md:flex-row justify-between items-center gap-8 text-[10px] font-bold uppercase tracking-widest text-ivory/20">
+          <p>© 2026 Savanna & Beyond. No middlemen. Just the plains.</p>
+          <div className="flex gap-10">
+            <a href="#" className="hover:text-ivory transition-colors">Terms of Expedition</a>
+            <a href="#" className="hover:text-ivory transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-ivory transition-colors">Sitemap</a>
+          </div>
         </div>
       </div>
     </footer>
   );
 };
+

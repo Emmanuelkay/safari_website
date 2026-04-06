@@ -1,0 +1,21 @@
+query ListPayments @auth(level: NO_ACCESS) {
+  payments {
+    id
+    amount
+    currency
+    status
+    paymentMethod
+    createdAt
+  }
+}
+
+/**
+ * 🔍 Polling Query: Get status of a specific booking payment
+ */
+query GetPaymentStatus($bookingRef: String!) @auth(level: NO_ACCESS) {
+  payments(where: { bookingRef: { eq: $bookingRef } }) {
+    status
+    paypalCaptureId
+    confirmedAt
+  }
+}

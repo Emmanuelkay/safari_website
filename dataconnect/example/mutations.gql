@@ -1,0 +1,80 @@
+mutation CreatePayment(
+  $amount: Float!, 
+  $currency: String!, 
+  $status: String!, 
+  $paymentMethod: String!, 
+  $bookingRef: String!,
+  $travelerEmail: String,
+  $travelerName: String,
+  $paymentType: String,
+  $paypalOrderId: String, 
+  $paypalCaptureId: String,
+  $captureStatus: String,
+  $stripePaymentIntentId: String, 
+  $mpesaReceiptNumber: String
+) @auth(level: NO_ACCESS) {
+  payment_insert(
+    data: {
+      amount: $amount
+      currency: $currency
+      status: $status
+      paymentMethod: $paymentMethod
+      bookingRef: $bookingRef
+      travelerEmail: $travelerEmail
+      travelerName: $travelerName
+      paymentType: $paymentType
+      paypalOrderId: $paypalOrderId
+      paypalCaptureId: $paypalCaptureId
+      captureStatus: $captureStatus
+      stripePaymentIntentId: $stripePaymentIntentId
+      mpesaReceiptNumber: $mpesaReceiptNumber
+    }
+  )
+}
+
+mutation UpdatePaymentStatus(
+  $paypalOrderId: String!,
+  $status: String!,
+  $paypalCaptureId: String,
+  $captureStatus: String,
+  $confirmedAt: Timestamp,
+  $deniedAt: Timestamp,
+  $paypalEventId: String,
+  $amountConfirmed: Float
+) @auth(level: NO_ACCESS) {
+  payment_update(
+    where: { paypalOrderId: { eq: $paypalOrderId } },
+    data: {
+      status: $status,
+      paypalCaptureId: $paypalCaptureId,
+      captureStatus: $captureStatus,
+      confirmedAt: $confirmedAt,
+      deniedAt: $deniedAt,
+      paypalEventId: $paypalEventId,
+      amountConfirmed: $amountConfirmed
+    }
+  )
+}
+
+/**
+ * 🪝 Webhook Mutation: Update payment based on Capture ID
+ */
+mutation ConfirmPayment(
+  $paypalCaptureId: String!, 
+  $status: String!, 
+  $paypalEventId: String, 
+  $amountConfirmed: Float, 
+  $confirmedAt: Timestamp,
+  $deniedAt: Timestamp
+) @auth(level: NO_ACCESS) {
+  payment_update(
+    where: { paypalCaptureId: { eq: $paypalCaptureId } },
+    data: {
+      status: $status,
+      paypalEventId: $paypalEventId,
+      amountConfirmed: $amountConfirmed,
+      confirmedAt: $confirmedAt,
+      deniedAt: $deniedAt
+    }
+  )
+}

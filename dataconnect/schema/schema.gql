@@ -1,0 +1,28 @@
+type Payment @table {
+  id: UUID! @default(expr: "uuidV4()")
+  amount: Float!
+  currency: String!
+  status: String!
+  paymentMethod: String!
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+  
+  # Custom PayPal Fields
+  bookingRef: String!
+  travelerEmail: String
+  travelerName: String
+  paymentType: String # "deposit" | "full"
+  paypalOrderId: String
+  paypalCaptureId: String
+  captureStatus: String
+  paypalEventId: String
+  amountConfirmed: Float
+  
+  # Auditing
+  confirmedAt: Timestamp
+  deniedAt: Timestamp
+  
+  # Other Gateways (Optional)
+  stripePaymentIntentId: String
+  mpesaReceiptNumber: String
+}
