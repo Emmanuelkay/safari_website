@@ -55,7 +55,7 @@ export const Hero = () => {
           </a>
           
           <a 
-            href="https://wa.me/254700000000" 
+            href="https://wa.me/254718592358" 
             target="_blank" 
             rel="noopener noreferrer"
             className="w-full sm:w-auto border border-ivory/30 bg-white/5 backdrop-blur-md text-ivory px-14 py-6 rounded-custom font-bold uppercase tracking-[0.3em] text-[12px] transition-all hover:bg-ivory/10 hover:border-ivory flex items-center justify-center gap-3"

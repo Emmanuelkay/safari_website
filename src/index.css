@@ -52,4 +52,37 @@
     pointer-events: none;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   }
+
+  /* Custom Phone Input Styles */
+  .premium-phone-container, .premium-phone-container-light {
+    @apply w-full !bg-transparent;
+  }
+
+  .premium-phone-input {
+    @apply !w-full !h-auto !bg-white/5 !border !border-white/10 !rounded-[4px] !py-4 !text-white !pl-[52px] !font-body !transition-all !outline-none focus:!border-gold placeholder:!text-zinc-500 !text-base !leading-tight !min-h-[58px];
+  }
+
+  .premium-phone-button {
+    @apply !bg-transparent !border-r !border-white/10 !rounded-l-[4px] !w-12 !h-auto !min-h-[58px] hover:!bg-white/5;
+  }
+
+  .premium-phone-input-light {
+    @apply !w-full !h-auto !bg-ivory !border !border-gold/10 !rounded-custom !py-5 !text-charcoal !pl-[60px] !font-body !transition-all !outline-none focus:!border-gold placeholder:!text-zinc-400 !text-base !leading-tight !min-h-[64px];
+  }
+
+  .premium-phone-button-light {
+    @apply !bg-transparent !border-r !border-gold/10 !rounded-l-custom !w-14 !h-auto !min-h-[64px] hover:!bg-gold/5;
+  }
+
+  .premium-phone-dropdown {
+    @apply !bg-charcoal !text-ivory !border !border-gold/20 !rounded-custom !shadow-2xl !mt-1 !max-h-64;
+  }
+
+  .premium-phone-dropdown .country-list .country:hover {
+    @apply !bg-gold/20 !transition-colors;
+  }
+
+  .premium-phone-dropdown .country-list .country.highlight {
+    @apply !bg-gold/30;
+  }
 }

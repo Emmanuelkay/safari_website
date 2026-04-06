@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 import { cn } from '../lib/utils';
 import { Check, ChevronRight, ChevronLeft, CreditCard, Smartphone, Globe, Landmark, ShieldCheck, Mail, MessageSquare } from 'lucide-react';
 import { db } from '../lib/firebase';
@@ -88,7 +90,7 @@ export const BookingEngine = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="/" className="btn-ochre bg-charcoal text-ivory">Back to Home</a>
-            <a href="https://wa.me/254700000000" className="btn-ochre border border-charcoal text-charcoal bg-transparent hover:bg-charcoal hover:text-ivory">Chat on WhatsApp</a>
+            <a href="https://wa.me/254718592358" className="btn-ochre border border-charcoal text-charcoal bg-transparent hover:bg-charcoal hover:text-ivory">Chat on WhatsApp</a>
           </div>
         </div>
       </section>
@@ -182,12 +184,20 @@ export const BookingEngine = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">WhatsApp Number</label>
-                    <input 
-                      name="whatsapp"
+                    <PhoneInput
+                      country={'ke'}
                       value={formData.whatsapp}
-                      onChange={handleInputChange}
-                      placeholder="+254..."
-                      className="w-full bg-ivory border-gold/10 p-5 rounded-custom font-body"
+                      onChange={phone => handleInputChange({ target: { name: 'whatsapp', value: phone } })}
+                      containerClass="premium-phone-container-light"
+                      inputClass="premium-phone-input-light"
+                      buttonClass="premium-phone-button-light"
+                      dropdownClass="premium-phone-dropdown"
+                      placeholder="718 592 358"
+                      inputProps={{
+                        name: 'whatsapp',
+                        required: true,
+                        autoFocus: false
+                      }}
                     />
                   </div>
                 </div>
@@ -241,7 +251,7 @@ export const BookingEngine = () => {
                 <div className="bg-ivory/50 border border-gold/20 p-10 rounded-custom space-y-6 relative overflow-hidden">
                   <div className="flex items-center gap-6 mb-4">
                     <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-lg border border-gold/10">
-                      <img src="https://www.paypalobjects.com/webstatic/icon/pp256.png" alt="PayPal" className="h-8 w-8" />
+                      <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-mark-color.svg" alt="PayPal" className="h-8 w-8" />
                     </div>
                     <div>
                       <h4 className="text-[14px] font-bold text-charcoal uppercase tracking-widest mb-1">Secure PayPal Gateway</h4>

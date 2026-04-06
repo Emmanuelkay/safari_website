@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 import { CheckoutModal } from './CheckoutModal';
 
 export const EnquiryEngine = () => {
@@ -101,17 +103,24 @@ export const EnquiryEngine = () => {
                         required 
                      />
                    </div>
-                   <div>
-                     <label className="block text-[11px] uppercase tracking-widest text-sand font-bold mb-3">WhatsApp Number</label>
-                     <input 
-                        type="tel" 
-                        placeholder="+1 234 567 890" 
+                    <div>
+                      <label className="block text-[11px] uppercase tracking-widest text-sand font-bold mb-3">WhatsApp Number</label>
+                      <PhoneInput
+                        country={'ke'}
                         value={formData.phone}
-                        onChange={(e) => handleInputChange('phone', e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-[4px] p-4 text-white placeholder:text-zinc-500 focus:border-ochre focus:outline-none transition-all" 
-                        required 
-                     />
-                   </div>
+                        onChange={phone => handleInputChange('phone', phone)}
+                        containerClass="premium-phone-container"
+                        inputClass="premium-phone-input"
+                        buttonClass="premium-phone-button"
+                        dropdownClass="premium-phone-dropdown"
+                        placeholder="718 592 358"
+                        inputProps={{
+                          name: 'phone',
+                          required: true,
+                          autoFocus: false
+                        }}
+                      />
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

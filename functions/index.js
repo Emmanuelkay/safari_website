@@ -19,8 +19,8 @@ const PAYPAL_API = process.env.PAYPAL_MODE === "live"
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://safari-web-2016-10649.web.app",
-  "https://safari-web-2016-10649.firebaseapp.com",
+  "https://safari-web-2026-10649.web.app",
+  "https://safari-web-2026-10649.firebaseapp.com",
   "https://savannabeyond.co.ke"
 ];
 

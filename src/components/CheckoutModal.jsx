@@ -80,7 +80,7 @@ const SuccessView = ({ booking, onClose }) => (
     </p>
 
     <a 
-      href={`https://wa.me/254700000000?text=Hi! My booking ref is ${booking.ref}`}
+      href={`https://wa.me/254718592358?text=Hi! My booking ref is ${booking.ref}`}
       target="_blank"
       rel="noopener noreferrer"
       className="flex items-center gap-2 px-8 py-4 bg-[#25D366] text-white rounded-full text-[11px] uppercase tracking-[0.2em] font-bold hover:shadow-lg transition-all"
@@ -109,7 +109,7 @@ const FailedView = ({ message, booking, onRetry }) => (
         Try Again
       </button>
       <a 
-        href="https://wa.me/254700000000"
+        href="https://wa.me/254718592358"
         className="w-full py-4 text-[11px] uppercase tracking-[0.3em] font-bold border border-zinc-200 rounded-custom hover:bg-zinc-50 transition-colors"
       >
         Get Help on WhatsApp
@@ -298,7 +298,7 @@ export const CheckoutModal = ({ isOpen, onClose, amount = 0, tripDetails = "", b
                 <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-12 md:p-16 flex-1 flex flex-col justify-center">
                    <div className="mb-12 p-8 bg-ivory/30 border border-gold/10 rounded-custom flex items-center gap-6">
                       <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md">
-                        <img src="https://www.paypalobjects.com/webstatic/icon/pp256.png" alt="PayPal" className="h-7 w-7" />
+                        <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-mark-color.svg" alt="PayPal" className="h-7 w-7" />
                       </div>
                       <div>
                         <h5 className="text-[14px] font-bold text-charcoal uppercase tracking-[0.2em] mb-1">Trusted Checkout</h5>
