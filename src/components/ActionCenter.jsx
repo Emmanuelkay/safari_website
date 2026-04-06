@@ -35,7 +35,7 @@ export const ActionCenter = () => {
 
         <div className="p-8 space-y-6">
            <a 
-             href="https://wa.me/254700000000" 
+             href="https://wa.me/254718592358" 
              target="_blank" 
              rel="noopener noreferrer"
              className="flex items-center gap-5 p-4 rounded-lg bg-zinc-50 border border-zinc-100 hover:bg-gold/10 hover:border-gold/30 transition-all group"
@@ -50,7 +50,7 @@ export const ActionCenter = () => {
            </a>
 
            <a 
-             href="tel:+254700000000" 
+             href="tel:+254718592358" 
              className="flex items-center gap-5 p-4 rounded-lg bg-zinc-50 border border-zinc-100 hover:bg-gold/10 hover:border-gold/30 transition-all group"
            >
              <div className="w-10 h-10 bg-white shadow-sm rounded-full flex items-center justify-center text-gold">
