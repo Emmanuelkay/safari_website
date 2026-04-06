@@ -149,12 +149,12 @@ export async function sendTravelerConfirmationEmail(booking, amountPaid, balance
         </ol>
 
         <div style="text-align: center; margin: 40px 0;">
-          <a href="https://wa.me/254700000000?text=Hi, my booking ref is ${booking.ref}" style="background: #8B6914; color: white; padding: 16px 32px; text-decoration: none; font-size: 15px; border-radius: 2px; letter-spacing: 0.05em;">WHATSAPP YOUR GUIDE TEAM</a>
+          <a href="https://wa.me/254718592358?text=Hi, my booking ref is ${booking.ref}" style="background: #8B6914; color: white; padding: 16px 32px; text-decoration: none; font-size: 15px; border-radius: 2px; letter-spacing: 0.05em;">WHATSAPP YOUR GUIDE TEAM</a>
         </div>
 
         <p style="color: #9B9189; font-size: 13px; border-top: 1px solid #E8E0D5; padding-top: 24px; margin-top: 40px;">
           Savanna & Beyond Expeditions Ltd · Nairobi, Kenya<br>
-          expeditions@savannabeyond.co.ke · +254 700 000 000<br>
+          expeditions@savannabeyond.co.ke · +254 718 592 358<br>
           Licensed by KATO · KWS Certified Guides
         </p>
       </div>
