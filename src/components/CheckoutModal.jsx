@@ -198,11 +198,11 @@ export const CheckoutModal = ({ isOpen, onClose, amount = 0, tripDetails = "", b
           experience_context: {
             payment_method_preference: 'IMMEDIATE_PAYMENT_REQUIRED',
             brand_name: 'Savanna & Beyond',
-            locale: 'en-US',
             landing_page: 'LOGIN',
             shipping_preference: 'NO_SHIPPING',
             user_action: 'PAY_NOW'
           }
+
         }
       }
     });
