@@ -15,6 +15,8 @@ export const EnquiryEngine = () => {
   });
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
 
   const depositRate = 500;
   const totalDeposit = formData.travelers * depositRate;
@@ -182,14 +184,35 @@ export const EnquiryEngine = () => {
                 </div>
 
                 <div className="flex flex-col gap-4">
-                  <button className="btn-ochre w-full py-5 text-base uppercase tracking-widest font-bold">Send General Enquiry</button>
                   <button 
-                    onClick={() => setIsCheckoutOpen(true)}
+                    type="button"
+                    onClick={() => {
+                      if (!isValidEmail(formData.email)) {
+                        alert("Please provide a functional email address.");
+                        return;
+                      }
+                      // For now, general enquiry just shows success if it's not going to PayPal
+                      setIsSuccess(true);
+                    }}
+                    className="btn-ochre w-full py-5 text-base uppercase tracking-widest font-bold"
+                  >
+                    Send General Enquiry
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      if (!isValidEmail(formData.email)) {
+                        alert("Please provide a functional email address.");
+                        return;
+                      }
+                      setIsCheckoutOpen(true);
+                    }}
                     className="w-full py-5 text-base uppercase tracking-widest font-bold bg-white text-midnight border border-white hover:bg-transparent hover:text-white transition-colors"
                   >
                     Proceed to Secure Deposit (${totalDeposit.toLocaleString()})
                   </button>
                 </div>
+
                 <p className="text-[11px] text-zinc-500 text-center uppercase tracking-wider">Secure your booking instantly. Refundable within 48 hours.</p>
              </form>
           </div>

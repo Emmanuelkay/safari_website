@@ -27,8 +27,24 @@ export const BookingEngine = () => {
   });
   const [success, setSuccess] = useState(false);
 
-  const nextStep = () => setStep(prev => Math.min(prev + 1, 5));
+  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const nextStep = () => {
+    if (step === 2) {
+      if (!formData.fullName || !formData.email || !formData.whatsapp) {
+        alert("Please fill all required traveler details.");
+        return;
+      }
+      if (!isValidEmail(formData.email)) {
+        alert("Please provide a functional email address.");
+        return;
+      }
+    }
+    setStep(prev => Math.min(prev + 1, 5));
+  };
+
   const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -49,7 +65,12 @@ export const BookingEngine = () => {
   };
 
   const handleSubmit = async () => {
+    if (!isValidEmail(formData.email)) {
+      alert("Please provide a functional email address.");
+      return;
+    }
     setLoading(true);
+
     try {
       const refId = `SNB-2026-${Math.floor(1000 + Math.random() * 9000)}`;
       
