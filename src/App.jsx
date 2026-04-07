@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Navbar } from './components/Navbar'
 import { Footer } from './components/Footer'
 import { Home } from './pages/Home'
+import { About } from './pages/About'
 import { TripProvider } from './context/TripContext'
 import { TripDrawer } from './components/TripDrawer'
 
@@ -48,6 +49,14 @@ function App() {
               element={
                 <PublicLayout>
                   <Home />
+                </PublicLayout>
+              }
+            />
+            <Route
+              path="/about"
+              element={
+                <PublicLayout>
+                  <About />
                 </PublicLayout>
               }
             />

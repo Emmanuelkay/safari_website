@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { cn } from '../lib/utils';
 import { ShieldCheck, Star, MapPin, MessageSquare, Users, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export const Hero = () => {
+  const { t } = useTranslation();
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
@@ -12,11 +14,11 @@ export const Hero = () => {
   }, []);
 
   const trustItems = [
-    { label: "KWS Certified", icon: <ShieldCheck size={14} /> },
-    { label: "5.0 ★ Google", icon: <Star size={14} /> },
-    { label: "4 Destinations", icon: <MapPin size={14} /> },
-    { label: "24hr WhatsApp", icon: <MessageSquare size={14} /> },
-    { label: "100% Private Groups", icon: <Users size={14} /> },
+    { label: t('hero.trust1'), icon: <ShieldCheck size={14} /> },
+    { label: t('hero.trust2'), icon: <Star size={14} /> },
+    { label: t('hero.trust3'), icon: <MapPin size={14} /> },
+    { label: t('hero.trust4'), icon: <MessageSquare size={14} /> },
+    { label: t('hero.trust5'), icon: <Users size={14} /> },
   ];
 
   return (
@@ -35,23 +37,22 @@ export const Hero = () => {
 
       {/* Hero Content */}
       <div className="relative z-20 container-custom text-center pt-20">
-        <span className="text-gold font-body text-[11px] md:text-[13px] font-bold uppercase tracking-[0.6em] mb-8 block animate-in fade-in slide-in-from-bottom-4 duration-1500">
-          No Middlemen. Just the Plains.
+        <span className="text-gold font-body text-[11px] md:text-[13px] font-bold uppercase tracking-[0.6em] mb-8 block animate-in fade-in slide-in-from-bottom-4 duration-1500 text-center">
+          {t('hero.subtitle')}
         </span>
         
         <h1 className="text-7xl md:text-9xl lg:text-[10rem] font-heading text-ivory mb-10 leading-[0.8] animate-in fade-in slide-in-from-bottom-6 duration-1500 delay-300">
-          Unforgettable <br />
-          <span className="italic font-light opacity-90">Kenya</span>
+          {t('hero.title1')} <br />
+          <span className="italic font-light opacity-90">{t('hero.title2')}</span>
         </h1>
         
         <p className="text-ivory/80 text-lg md:text-2xl font-body max-w-3xl mx-auto mb-16 leading-relaxed tracking-wide font-light animate-in fade-in slide-in-from-bottom-8 duration-1500 delay-500">
-          Expert-guided expeditions into the heart of the great migration. <br className="hidden md:block" />
-          Discover the soul of the savanna through a lens of pure luxury.
+           {t('hero.desc')}
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-8 animate-in fade-in slide-in-from-bottom-10 duration-1500 delay-700">
-          <a href="#booking" className="group w-full sm:w-auto bg-gold text-charcoal px-14 py-6 rounded-custom font-bold uppercase tracking-[0.3em] text-[12px] transition-all hover:bg-ivory hover:-translate-y-1 shadow-2xl flex items-center justify-center gap-3">
-            Plan My Trip <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          <a href="/#booking" className="group w-full sm:w-auto bg-gold text-charcoal px-14 py-6 rounded-custom font-bold uppercase tracking-[0.3em] text-[12px] transition-all hover:bg-ivory hover:-translate-y-1 shadow-2xl flex items-center justify-center gap-3">
+            {t('hero.planTrips')} <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
           </a>
           
           <a 
@@ -60,7 +61,7 @@ export const Hero = () => {
             rel="noopener noreferrer"
             className="w-full sm:w-auto border border-ivory/30 bg-white/5 backdrop-blur-md text-ivory px-14 py-6 rounded-custom font-bold uppercase tracking-[0.3em] text-[12px] transition-all hover:bg-ivory/10 hover:border-ivory flex items-center justify-center gap-3"
           >
-            WhatsApp Us
+            {t('hero.whatsapp')}
           </a>
         </div>
       </div>

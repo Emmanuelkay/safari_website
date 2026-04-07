@@ -6,10 +6,12 @@ import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useTrip } from '../context/TripContext';
 import { CheckoutModal } from './CheckoutModal';
+import { useTranslation } from 'react-i18next';
 
-const STEPS = ["Choose Safari", "Your Details", "Review", "Payment"];
+const getSteps = (t) => t('booking.steps', { returnObjects: true }) || ["Choose Safari", "Your Details", "Review", "Payment"];
 
 export const BookingEngine = () => {
+  const { t } = useTranslation();
   const { trip, updateGuests, updateDates } = useTrip();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -32,11 +34,11 @@ export const BookingEngine = () => {
   const nextStep = () => {
     if (step === 2) {
       if (!formData.fullName || !formData.email || !formData.whatsapp) {
-        alert("Please fill all required traveler details.");
+        alert(t('booking.alerts.fillDetails'));
         return;
       }
       if (!isValidEmail(formData.email)) {
-        alert("Please provide a functional email address.");
+        alert(t('booking.alerts.invalidEmail'));
         return;
       }
     }
@@ -66,7 +68,7 @@ export const BookingEngine = () => {
 
   const handleSubmit = async () => {
     if (!isValidEmail(formData.email)) {
-      alert("Please provide a functional email address.");
+      alert(t('booking.alerts.invalidEmail'));
       return;
     }
     setLoading(true);
@@ -74,11 +76,23 @@ export const BookingEngine = () => {
     try {
       const refId = `SNB-2026-${Math.floor(1000 + Math.random() * 9000)}`;
       
+      // SANITIZE DATA: Remove non-serializable React elements (icons)
+      const sanitizedAddons = trip.addons.map(({ icon, ...rest }) => rest);
+      const sanitizedPackage = trip.package ? { 
+        id: trip.package.id, 
+        price: trip.package.price,
+        category: trip.package.category
+      } : null;
+
       // Save the booking to Firestore FIRST, so the backend validation doesn't fail
       await addDoc(collection(db, "bookings"), {
         ...formData,
-        ...trip,
-        packageName: trip.package?.title,
+        trip: {
+          ...trip,
+          addons: sanitizedAddons,
+          package: sanitizedPackage
+        },
+        packageName: trip.package?.id ? t(`packages.p${trip.package.id}.title`) : 'Safari',
         totalAmount: calculateTotal(),
         ref: refId,           // Changed from bookingRef to map to backend query
         bookingRef: refId,    // Kept for frontend compatibility
@@ -98,7 +112,7 @@ export const BookingEngine = () => {
       setStep(5);
     } catch (error) {
       console.error("Booking failed:", error);
-      alert("Something went wrong. Please reach us via WhatsApp.");
+      alert(t('booking.alerts.error'));
     } finally {
       setLoading(false);
     }
@@ -111,14 +125,14 @@ export const BookingEngine = () => {
           <div className="w-24 h-24 bg-gold rounded-full flex items-center justify-center mx-auto mb-10 text-charcoal">
             <Check size={40} strokeWidth={3} />
           </div>
-          <h2 className="text-5xl font-heading text-charcoal mb-6">Expedition Reserved</h2>
+          <h2 className="text-5xl font-heading text-charcoal mb-6">{t('booking.success.title')}</h2>
           <p className="text-zinc-500 mb-10 font-body">
-            Booking Reference: <span className="text-earth font-bold">{bookingRef}</span><br />
-            Our Nairobi team will contact you within 24 hours to finalise your itinerary.
+            {t('booking.success.ref')}: <span className="text-earth font-bold">{bookingRef}</span><br />
+            {t('booking.success.desc')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/" className="btn-ochre bg-charcoal text-ivory">Back to Home</a>
-            <a href="https://wa.me/254718592358" className="btn-ochre border border-charcoal text-charcoal bg-transparent hover:bg-charcoal hover:text-ivory">Chat on WhatsApp</a>
+            <a href="/" className="btn-ochre bg-charcoal text-ivory">{t('common.backHome')}</a>
+            <a href="https://wa.me/254718592358" className="btn-ochre border border-charcoal text-charcoal bg-transparent hover:bg-charcoal hover:text-ivory">{t('common.chatWhatsApp')}</a>
           </div>
         </div>
       </section>
@@ -132,8 +146,8 @@ export const BookingEngine = () => {
           {/* Form Side */}
           <div>
             <div className="mb-12">
-               <span className="text-gold font-body text-[11px] font-bold tracking-[0.4em] uppercase mb-4 block">Secure Your Expedition</span>
-               <h2 className="text-5xl font-heading text-charcoal mb-8">Step {step}: {STEPS[step-1]}</h2>
+               <span className="text-gold font-body text-[11px] font-bold tracking-[0.4em] uppercase mb-4 block">{t('booking.header.secure')}</span>
+               <h2 className="text-5xl font-heading text-charcoal mb-8">{t('booking.header.step', { step })}: {getSteps(t)[step-1]}</h2>
                
                {/* Progress Bar */}
                <div className="flex gap-2 mb-12">
@@ -151,20 +165,22 @@ export const BookingEngine = () => {
               <div className="space-y-8 animate-in fade-in slide-in-from-right-4">
                 <div className="bg-ivory/50 p-8 rounded-custom border border-gold/10">
                    <div className="flex justify-between items-center mb-4">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Current Selection</span>
-                      <a href="#packages" className="text-[10px] text-ochre font-bold uppercase hover:underline">Change Safari</a>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('booking.step1.currentSelection')}</span>
+                      <a href="#packages" className="text-[10px] text-ochre font-bold uppercase hover:underline">{t('booking.step1.changeSafari')}</a>
                    </div>
-                   <h3 className="text-3xl font-heading text-charcoal mb-2">{trip.package?.title || 'No Safari Selected'}</h3>
+                   <h3 className="text-3xl font-heading text-charcoal mb-2">{trip.package?.id ? t(`packages.p${trip.package.id}.title`) : t('booking.step1.noSafari')}</h3>
                    <div className="flex flex-wrap gap-2">
                       {trip.addons.map(a => (
-                        <span key={a.id} className="bg-gold/10 text-gold px-2 py-1 text-[9px] font-bold rounded uppercase">{a.name}</span>
+                        <span key={a.id} className="bg-gold/10 text-gold px-2 py-1 text-[9px] font-bold rounded uppercase">
+                          {t(`addons.${a.id.includes('village') || a.id.includes('boat') || a.id.includes('hotel') || a.id.includes('sim') ? 'practical' : 'signature'}.${a.id}.name`)}
+                        </span>
                       ))}
                    </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-8">
+                 <div className="grid grid-cols-2 gap-8">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Travelers</label>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('booking.step1.travelers')}</label>
                     <input 
                       type="number" 
                       min="1"
@@ -174,7 +190,7 @@ export const BookingEngine = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Preferred Date</label>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('booking.step1.preferredDate')}</label>
                     <input 
                       type="date" 
                       value={trip.dates}
@@ -189,8 +205,8 @@ export const BookingEngine = () => {
             {/* STEP 2: Details */}
             {step === 2 && (
               <div className="space-y-8 animate-in fade-in slide-in-from-right-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Full Name</label>
+                 <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('booking.step2.fullName')}</label>
                   <input 
                     name="fullName"
                     value={formData.fullName}
@@ -201,7 +217,7 @@ export const BookingEngine = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-8">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Email Address</label>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('booking.step2.email')}</label>
                     <input 
                       name="email"
                       type="email"
@@ -211,7 +227,7 @@ export const BookingEngine = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">WhatsApp Number</label>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('booking.step2.whatsapp')}</label>
                     <div className="relative group">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-400 group-focus-within:text-gold transition-colors">
                         <Phone size={18} />
@@ -221,7 +237,7 @@ export const BookingEngine = () => {
                         name="whatsapp"
                         value={formData.whatsapp}
                         onChange={handleInputChange}
-                        placeholder="WhatsApp Number (e.g. +254 718 592 358)"
+                        placeholder={t('booking.step2.whatsappPlaceholder')}
                         className="w-full bg-ivory border border-gold/10 p-5 pl-12 rounded-custom font-body focus:border-gold focus:outline-none transition-all placeholder:text-zinc-400"
                         required
                       />
@@ -229,7 +245,7 @@ export const BookingEngine = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                   <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Special Requests</label>
+                   <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('booking.step2.requests')}</label>
                    <textarea 
                      name="requests"
                      value={formData.requests}
@@ -244,27 +260,27 @@ export const BookingEngine = () => {
             {/* STEP 3: Review */}
             {step === 3 && (
               <div className="space-y-8 animate-in fade-in slide-in-from-right-4">
-                <div className="bg-ivory p-10 rounded-custom space-y-6 shadow-sm">
+                 <div className="bg-ivory p-10 rounded-custom space-y-6 shadow-sm">
                   <div className="flex justify-between border-b border-gold/10 pb-4">
-                    <span className="text-zinc-500 font-body">Expedition</span>
-                    <span className="font-heading text-xl text-charcoal">{trip.package?.title || 'Not Selected'}</span>
+                    <span className="text-zinc-500 font-body">{t('booking.step3.expedition')}</span>
+                    <span className="font-heading text-xl text-charcoal">{trip.package?.id ? t(`packages.p${trip.package.id}.title`) : t('booking.step1.noSafari')}</span>
                   </div>
                   <div className="flex justify-between border-b border-gold/10 pb-4">
-                    <span className="text-zinc-500 font-body">Travelers</span>
-                    <span className="text-charcoal font-bold">{trip.guests} Adults</span>
+                    <span className="text-zinc-500 font-body">{t('booking.step1.travelers')}</span>
+                    <span className="text-charcoal font-bold">{trip.guests} {t('common.adults')}</span>
                   </div>
                   <div className="flex justify-between border-b border-gold/10 pb-4">
-                    <span className="text-zinc-500 font-body">Date</span>
-                    <span className="text-charcoal font-bold">{trip.dates || 'TBD'}</span>
+                    <span className="text-zinc-500 font-body">{t('booking.step3.date')}</span>
+                    <span className="text-charcoal font-bold">{trip.dates || t('common.tbd')}</span>
                   </div>
                    <div className="flex justify-between border-b border-gold/10 pb-4">
-                    <span className="text-zinc-500 font-body">Extras</span>
+                    <span className="text-zinc-500 font-body">{t('booking.step3.extras')}</span>
                     <div className="text-right">
-                       {trip.addons.map(a => <div key={a.id} className="text-[11px] font-bold text-gold uppercase">{a.name}</div>)}
+                       {trip.addons.map(a => <div key={a.id} className="text-[11px] font-bold text-gold uppercase">{t(`addons.${a.id.includes('village') || a.id.includes('boat') || a.id.includes('hotel') || a.id.includes('sim') ? 'practical' : 'signature'}.${a.id}.name`)}</div>)}
                     </div>
                   </div>
                   <div className="flex justify-between pt-4">
-                    <span className="text-charcoal font-bold">Estimated Total</span>
+                    <span className="text-charcoal font-bold">{t('booking.step3.total')}</span>
                     <span className="text-3xl font-heading text-gold font-bold">${calculateTotal().toLocaleString()}</span>
                   </div>
                 </div>
@@ -281,19 +297,19 @@ export const BookingEngine = () => {
                       <ShieldCheck className="w-8 h-8 text-gold" />
                     </div>
                     <div>
-                      <h4 className="text-[14px] font-bold text-charcoal uppercase tracking-widest mb-1">Secure PayPal Gateway</h4>
-                      <p className="text-[11px] text-[#6B6158]">Handle cards, credit, or PayPal accounts securely.</p>
+                      <h4 className="text-[14px] font-bold text-charcoal uppercase tracking-widest mb-1">{t('booking.step4.gatewayTitle')}</h4>
+                      <p className="text-[11px] text-[#6B6158]">{t('booking.step4.gatewayDesc')}</p>
                     </div>
                   </div>
                   
                   <div className="space-y-4 pt-6 border-t border-gold/10">
                     <div className="flex items-start gap-4">
                       <Check className="w-4 h-4 text-gold mt-0.5" />
-                      <span className="text-[12px] text-zinc-500 font-body">Encrypted 256-bit SSL transaction</span>
+                      <span className="text-[12px] text-zinc-500 font-body">{t('booking.step4.feature1')}</span>
                     </div>
                     <div className="flex items-start gap-4">
                       <Check className="w-4 h-4 text-gold mt-0.5" />
-                      <span className="text-[12px] text-zinc-500 font-body">No account required (Credit/Debit accepted)</span>
+                      <span className="text-[12px] text-zinc-500 font-body">{t('booking.step4.feature2')}</span>
                     </div>
                   </div>
 
@@ -304,10 +320,10 @@ export const BookingEngine = () => {
                 
                 <div className="bg-gold/5 p-8 rounded-custom border border-dashed border-gold/30">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-zinc-500 text-sm">30% Deposit Required</span>
-                    <span className="text-2xl font-heading text-charcoal">${(calculateTotal() * 0.3).toLocaleString()}</span>
+                    <span className="text-zinc-500 text-sm">{t('booking.step4.depositLabel')}</span>
+                    <span className="text-2xl font-heading text-charcoal">${calculateTotal().toLocaleString()}</span>
                   </div>
-                  <p className="text-[10px] text-zinc-400 italic">Balance due 30 days before travel. No hidden fees.</p>
+                  <p className="text-[10px] text-zinc-400 italic">{t('booking.step4.depositNote')}</p>
                 </div>
               </div>
             )}
@@ -316,7 +332,7 @@ export const BookingEngine = () => {
             <div className="mt-16 flex gap-4">
               {step > 1 && (
                 <button onClick={prevStep} className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-400 hover:text-charcoal transition-colors">
-                  <ChevronLeft size={16} /> Back
+                  <ChevronLeft size={16} /> {t('common.back')}
                 </button>
               )}
               <button 
@@ -324,7 +340,7 @@ export const BookingEngine = () => {
                 disabled={loading || (step === 1 && !trip.package)}
                 className="ml-auto bg-gold text-charcoal px-14 py-6 rounded-custom font-bold uppercase tracking-[0.3em] text-[12px] flex items-center gap-3 transition-transform hover:-translate-y-1 shadow-2xl disabled:opacity-50"
               >
-                {loading ? 'Processing...' : step === 4 ? 'Confirm & Reserve' : 'Next Step'} <ChevronRight size={16} />
+                {loading ? t('common.processing') : step === 4 ? t('booking.header.confirm') : t('common.nextStep')} <ChevronRight size={16} />
               </button>
             </div>
           </div>
@@ -332,9 +348,9 @@ export const BookingEngine = () => {
           {/* Trust Side */}
           <div className="bg-ivory rounded-lg p-10 flex flex-col h-fit sticky top-32">
              <div className="mb-10 pb-10 border-b border-gold/10">
-                <h3 className="font-heading text-3xl text-charcoal mb-4 tracking-tight">Booking Policy</h3>
+                <h3 className="font-heading text-3xl text-charcoal mb-4 tracking-tight">{t('booking.policy.title')}</h3>
                 <p className="text-[13px] text-zinc-500 leading-relaxed font-body">
-                   A 30% deposit secures your expedition. The remaining balance is payable within 30 days of departure.
+                   {t('booking.policy.desc')}
                 </p>
              </div>
 
@@ -344,8 +360,8 @@ export const BookingEngine = () => {
                     <ShieldCheck size={20} />
                   </div>
                   <div>
-                    <h4 className="text-[11px] font-bold uppercase text-charcoal tracking-widest mb-1 shadow-sm">Secure Payment</h4>
-                    <p className="text-[12px] text-zinc-500 leading-relaxed font-body">256-bit SSL encrypted transactions.</p>
+                    <h4 className="text-[11px] font-bold uppercase text-charcoal tracking-widest mb-1 shadow-sm">{t('booking.policy.feature1Title')}</h4>
+                    <p className="text-[12px] text-zinc-500 leading-relaxed font-body">{t('booking.policy.feature1Desc')}</p>
                   </div>
                </div>
                <div className="flex items-start gap-5">
@@ -353,8 +369,8 @@ export const BookingEngine = () => {
                     <Mail size={20} />
                   </div>
                   <div>
-                    <h4 className="text-[11px] font-bold uppercase text-charcoal tracking-widest mb-1 shadow-sm">Instant Confirmation</h4>
-                    <p className="text-[12px] text-zinc-500 leading-relaxed font-body">Reference generated immediately.</p>
+                    <h4 className="text-[11px] font-bold uppercase text-charcoal tracking-widest mb-1 shadow-sm">{t('booking.policy.feature2Title')}</h4>
+                    <p className="text-[12px] text-zinc-500 leading-relaxed font-body">{t('booking.policy.feature2Desc')}</p>
                   </div>
                </div>
                <div className="flex items-start gap-5">
@@ -362,8 +378,8 @@ export const BookingEngine = () => {
                     <MessageSquare size={20} />
                   </div>
                   <div>
-                    <h4 className="text-[11px] font-bold uppercase text-charcoal tracking-widest mb-1 shadow-sm">Lead Guide Support</h4>
-                    <p className="text-[12px] text-zinc-500 leading-relaxed font-body">Direct contact with our Nairobi team.</p>
+                    <h4 className="text-[11px] font-bold uppercase text-charcoal tracking-widest mb-1 shadow-sm">{t('booking.policy.feature3Title')}</h4>
+                    <p className="text-[12px] text-zinc-500 leading-relaxed font-body">{t('booking.policy.feature3Desc')}</p>
                   </div>
                </div>
              </div>
@@ -375,19 +391,21 @@ export const BookingEngine = () => {
         isOpen={isCheckoutOpen} 
         onClose={() => setIsCheckoutOpen(false)}
         onSuccess={() => setSuccess(true)}
-        amount={calculateTotal() * 0.3} // 30% Deposit
-        tripDetails={`${trip.package?.title || 'Safari'} - ${trip.guests} Travelers`}
+        amount={calculateTotal()}
+        tripDetails={`${trip.package?.id ? t(`packages.p${trip.package.id}.title`) : 'Safari'} - ${trip.guests} ${t('common.adults')}`}
         bookingData={{
           ...formData,
           ...trip,
-          packageName: trip.package?.title,
+          name: formData.fullName,
+          travelers: trip.guests,
+          travelDate: trip.dates || 'TBD',
+          packageName: trip.package?.id ? t(`packages.p${trip.package.id}.title`) : 'Safari',
           totalAmount: calculateTotal(),
           ref: bookingRef,
           bookingRef: bookingRef,
-          depositAmount: calculateTotal() * 0.3
+          depositAmount: calculateTotal()
         }}
       />
     </section>
   );
 };
-

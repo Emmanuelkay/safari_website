@@ -8,6 +8,7 @@ import { functions, db } from '../lib/firebase';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShieldCheck, CheckCircle2, AlertCircle, MessageCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const STATES = {
   IDLE: 'idle',
@@ -127,6 +128,7 @@ const FailedView = ({ message, booking, onRetry }) => (
  * 👑 Checkout Modal
  */
 export const CheckoutModal = ({ isOpen, onClose, amount = 0, tripDetails = "", bookingData = null }) => {
+  const { t } = useTranslation();
   const [paymentState, setPaymentState] = useState(STATES.IDLE);
   const [errorMessage, setErrorMessage] = useState('');
   const [{ isPending }] = usePayPalScriptReducer();
@@ -175,7 +177,7 @@ export const CheckoutModal = ({ isOpen, onClose, amount = 0, tripDetails = "", b
       intent: 'CAPTURE',
       purchase_units: [{
         reference_id: booking.ref,
-        description: `${booking.packageName} | 30% Deposit — Savanna & Beyond`,
+        description: `${booking.packageName} | Full Payment — Savanna & Beyond`,
         custom_id: booking.ref,
         soft_descriptor: 'SAVANNA&BEYOND',
         amount: {
@@ -187,7 +189,7 @@ export const CheckoutModal = ({ isOpen, onClose, amount = 0, tripDetails = "", b
         },
         items: [{
           name: booking.packageName,
-          description: `30% deposit payment | ${booking.travelers} travelers | Departing ${booking.travelDate}`,
+          description: `Full payment | ${booking.travelers} travelers | Departing ${booking.travelDate}`,
           unit_amount: { currency_code: 'USD', value: booking.depositAmount.toFixed(2) },
           quantity: '1',
           category: 'DIGITAL_GOODS'
@@ -244,25 +246,25 @@ export const CheckoutModal = ({ isOpen, onClose, amount = 0, tripDetails = "", b
           {/* Subtle Acacia Watermark */}
           <div className="absolute -bottom-10 -left-10 text-charcoal/5 pointer-events-none select-none text-[200px] rotate-12">🌿</div>
           
-          <div className="relative z-10">
+          <div className="relative z-10 text-charcoal">
             <span className="text-gold font-body text-[10px] font-bold tracking-[0.4em] uppercase block mb-4">Official Receipt</span>
-            <h3 className="text-4xl font-heading text-charcoal mb-10 leading-tight">Secure Your Expedition</h3>
+            <h3 className="text-4xl font-heading mb-10 leading-tight">{t('booking.header.secure')}</h3>
 
             <div className="space-y-6 mb-12">
               <div className="flex justify-between text-[13px]">
                 <span className="text-[#6B6158]">Trip Detail:</span>
-                <span className="font-medium text-charcoal text-right max-w-[160px] truncate">{tripDetails}</span>
+                <span className="font-medium text-right max-w-[160px] truncate">{tripDetails}</span>
               </div>
               <div className="flex justify-between text-[13px]">
                 <span className="text-[#6B6158]">Reference:</span>
-                <span className="font-medium text-charcoal tracking-widest">{booking.ref}</span>
+                <span className="font-medium tracking-widest">{booking.ref}</span>
               </div>
               <div className="h-px bg-gold/20 w-full my-8" />
               <div className="flex justify-between items-baseline">
-                <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#A59D94]">Deposit Due</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#A59D94]">{t('booking.step4.depositLabel')}</span>
                 <span className="text-5xl font-heading text-gold font-semibold">${amount.toFixed(0)}</span>
               </div>
-              <p className="text-[10px] text-charcoal/40 uppercase tracking-widest italic pt-2">30% deposit to lock dates</p>
+              <p className="text-[10px] text-charcoal/40 uppercase tracking-widest italic pt-2">{t('booking.step4.depositNote')}</p>
             </div>
           </div>
 
@@ -308,8 +310,8 @@ export const CheckoutModal = ({ isOpen, onClose, amount = 0, tripDetails = "", b
                           <ShieldCheck className="w-7 h-7 text-gold" />
                       </div>
                       <div>
-                        <h5 className="text-[14px] font-bold text-charcoal uppercase tracking-[0.2em] mb-1">Trusted Checkout</h5>
-                        <p className="text-[12px] text-[#6B6158]">Direct processing via PayPal secure portal</p>
+                        <h5 className="text-[14px] font-bold text-charcoal uppercase tracking-[0.2em] mb-1">{t('booking.policy.feature1Title')}</h5>
+                        <p className="text-[12px] text-[#6B6158]">{t('booking.policy.feature1Desc')}</p>
                       </div>
                    </div>
 

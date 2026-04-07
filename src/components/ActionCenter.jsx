@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { MessageCircle, Phone, Clock, ShieldCheck, X } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useTranslation } from 'react-i18next';
 
 export const ActionCenter = () => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -18,7 +20,7 @@ export const ActionCenter = () => {
         {isOpen ? <X size={24} /> : <MessageCircle size={24} className="text-gold" />}
         {!isOpen && (
           <span className="absolute -top-2 -right-2 bg-charcoal text-[8px] font-bold text-ivory px-2 py-1 rounded-full uppercase tracking-widest border border-gold/20">
-            Online
+            {t('common.online')}
           </span>
         )}
       </button>
@@ -29,8 +31,8 @@ export const ActionCenter = () => {
         isOpen ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-90 translate-y-10 pointer-events-none"
       )}>
         <div className="p-8 bg-ivory/50 border-b border-gold/10">
-           <h3 className="font-heading text-2xl text-charcoal mb-2 tracking-tight">HQ Concierge</h3>
-           <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-zinc-400">Nairobi, Kenya · Wilson Airport</p>
+           <h3 className="font-heading text-2xl text-charcoal mb-2 tracking-tight">{t('actionCenter.title')}</h3>
+           <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-zinc-400">{t('actionCenter.location')}</p>
         </div>
 
         <div className="p-8 space-y-6">
@@ -44,8 +46,8 @@ export const ActionCenter = () => {
                 <MessageCircle size={18} />
              </div>
              <div>
-                <h4 className="text-[12px] font-bold text-charcoal">Quick Chat</h4>
-                <p className="text-[10px] text-zinc-400 font-medium italic">Usually replies in 10 minutes</p>
+                <h4 className="text-[12px] font-bold text-charcoal">{t('actionCenter.quickChat.title')}</h4>
+                <p className="text-[10px] text-zinc-400 font-medium italic">{t('actionCenter.quickChat.desc')}</p>
              </div>
            </a>
 
@@ -57,17 +59,17 @@ export const ActionCenter = () => {
                 <Phone size={18} />
              </div>
              <div>
-                <h4 className="text-[12px] font-bold text-charcoal">Voice Call</h4>
-                <p className="text-[10px] text-zinc-400 font-medium italic">Speak with a Lead Guide</p>
+                <h4 className="text-[12px] font-bold text-charcoal">{t('actionCenter.voiceCall.title')}</h4>
+                <p className="text-[10px] text-zinc-400 font-medium italic">{t('actionCenter.voiceCall.desc')}</p>
              </div>
            </a>
 
            <div className="flex flex-col gap-4 pt-4 border-t border-zinc-50">
               <div className="flex items-center gap-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                 <Clock size={12} className="text-gold" /> HQ Open: 08:00 — 18:00 EAT
+                 <Clock size={12} className="text-gold" /> {t('actionCenter.hours')}
               </div>
               <div className="flex items-center gap-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                 <ShieldCheck size={12} className="text-gold" /> Licensed & Insured Operator
+                 <ShieldCheck size={12} className="text-gold" /> {t('actionCenter.licensed')}
               </div>
            </div>
         </div>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://savannabeyond.co.ke/sitemap.xml
