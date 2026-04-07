@@ -182,7 +182,6 @@ async function handlePaymentSuccess(resource) {
   // 3. Trigger Notifications
   await Promise.allSettled([
     notifications.sendTravelerConfirmationEmail(bookingData, actualPaid, balanceDue),
-    notifications.sendTravelerWhatsApp(bookingData, actualPaid, balanceDue),
     notifications.sendAdminAlert(bookingData, actualPaid)
   ]);
 }

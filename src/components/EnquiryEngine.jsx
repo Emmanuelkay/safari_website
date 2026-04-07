@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import PhoneInput from 'react-phone-input-2';
-import 'react-phone-input-2/lib/style.css';
+import { Phone } from 'lucide-react';
 import { CheckoutModal } from './CheckoutModal';
+
 
 export const EnquiryEngine = () => {
   const [formData, setFormData] = useState({
@@ -20,8 +20,15 @@ export const EnquiryEngine = () => {
   const totalDeposit = formData.travelers * depositRate;
 
   const handleInputChange = (field, value) => {
+    // For phone, allow only numbers and '+'
+    if (field === 'phone') {
+      const sanitized = value.replace(/[^0-9+]/g, '');
+      setFormData(prev => ({ ...prev, [field]: sanitized }));
+      return;
+    }
     setFormData(prev => ({ ...prev, [field]: value }));
   };
+
 
   if (isSuccess) {
     return (
@@ -105,21 +112,20 @@ export const EnquiryEngine = () => {
                    </div>
                     <div>
                       <label className="block text-[11px] uppercase tracking-widest text-sand font-bold mb-3">WhatsApp Number</label>
-                      <PhoneInput
-                        country={'ke'}
-                        value={formData.phone}
-                        onChange={phone => handleInputChange('phone', phone)}
-                        containerClass="premium-phone-container"
-                        inputClass="premium-phone-input"
-                        buttonClass="premium-phone-button"
-                        dropdownClass="premium-phone-dropdown"
-                        placeholder="718 592 358"
-                        inputProps={{
-                          name: 'phone',
-                          required: true,
-                          autoFocus: false
-                        }}
-                      />
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-500 group-focus-within:text-gold transition-colors">
+                          <Phone size={18} />
+                        </div>
+                        <input 
+                          type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={(e) => handleInputChange('phone', e.target.value)}
+                          placeholder="WhatsApp Number (e.g. +254 718 592 358)"
+                          className="w-full bg-white/5 border border-white/10 rounded-[4px] p-4 pl-12 text-white placeholder:text-zinc-500 focus:border-gold focus:outline-none transition-all"
+                          required
+                        />
+                      </div>
                     </div>
                 </div>
 

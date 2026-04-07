@@ -58,10 +58,6 @@ async function sendEmail({ to, subject, html }) {
   }
 }
 
-async function sendWhatsAppMessage({ to, message }) {
-  console.log(`[WhatsApp-DISABLED] Would have sent to ${to}: ${message}`);
-  return { success: true, message: "WhatsApp Disabled" };
-}
 
 /**
  * ─── TRAVELER NOTIFICATIONS ──────────────────
@@ -140,28 +136,6 @@ export async function sendTravelerConfirmationEmail(booking, amountPaid, balance
   });
 }
 
-export async function sendTravelerWhatsApp(booking, amountPaid, balanceDue) {
-  const message = `✅ *Booking Confirmed — Savanna & Beyond*
-
-Hi ${booking.travelerName}! Your safari is secured 🦁
-
-📋 *Ref:* ${booking.ref}
-🌿 *Safari:* ${booking.packageName}
-🏕 *Stay:* ${booking.lodgeName}
-📅 *Dates:* ${formatDate(booking.travelDate)}
-👥 *Travelers:* ${booking.travelers}
-
-💰 *Deposit paid:* $${amountPaid} USD
-${balanceDue > 0 ? `⏳ *Balance due:* $${balanceDue} by ${formatDate(booking.balanceDueDate)}` : `✓ *Paid in full*`}
-
-Our Nairobi team will be in touch within 24 hours to finalise your itinerary.
-
-Questions? Reply to this message anytime.
-
-_Savanna & Beyond · expeditions@savannabeyond.co.ke_`;
-
-  await sendWhatsAppMessage({ to: booking.travelerWhatsApp, message });
-}
 
 export async function sendPaymentFailedEmail(booking) {
   await sendEmail({
@@ -179,7 +153,7 @@ export async function sendAdminAlert(booking, amountPaid, isFraud = false) {
   const expectedDeposit = (booking.totalAmount || booking.totalAmountUSD || 0) * 0.3;
   const adminMessage = isFraud 
     ? `🚨 *SECURITY ALERT: POSSIBLE FRAUD* 🚨\n\n*Amount Manipulation Attempt Detected via External Tool (e.g. Burp Suite)!*\n\n*Ref:* ${booking.ref}\n*Guest:* ${booking.travelerName}\n*Amount Captured:* $${amountPaid} USD\n*Required Deposit:* $${expectedDeposit.toFixed(2)} USD\n\n⚠️ *Action:* Do NOT confirm this booking. Verify the transaction in the PayPal dashboard immediately.`
-    : `💰 *NEW PAYMENT RECEIVED*\n\n*Ref:* ${booking.ref}\n*Guest:* ${booking.travelerName}\n*Package:* ${booking.packageName}\n*Travel date:* ${formatDate(booking.travelDate)}\n*Amount paid:* $${amountPaid} USD (PayPal)\n*Traveler email:* ${booking.travelerEmail}\n*Traveler WhatsApp:* ${booking.travelerWhatsApp}\n\nAction required: Send itinerary within 24 hours.\nDashboard: https://savannabeyond.co.ke/admin/bookings/${booking.ref}`;
+    : `💰 *NEW PAYMENT RECEIVED*\n\n*Ref:* ${booking.ref}\n*Guest:* ${booking.travelerName}\n*Package:* ${booking.packageName}\n*Travel date:* ${formatDate(booking.travelDate)}\n*Amount paid:* $${amountPaid} USD (PayPal)\n*Traveler email:* ${booking.travelerEmail}\n\nAction required: Send itinerary within 24 hours.\nDashboard: https://savannabeyond.co.ke/admin/bookings/${booking.ref}`;
 
   await sendEmail({
     to: 'expeditions@savannabeyond.co.ke',

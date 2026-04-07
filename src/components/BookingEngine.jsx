@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import PhoneInput from 'react-phone-input-2';
-import 'react-phone-input-2/lib/style.css';
 import { cn } from '../lib/utils';
-import { Check, ChevronRight, ChevronLeft, CreditCard, Smartphone, Globe, Landmark, ShieldCheck, Mail, MessageSquare } from 'lucide-react';
+import { Check, ChevronRight, ChevronLeft, CreditCard, Smartphone, Globe, Landmark, ShieldCheck, Mail, MessageSquare, Phone } from 'lucide-react';
+
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useTrip } from '../context/TripContext';
@@ -33,8 +32,15 @@ export const BookingEngine = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    // For phone/whatsapp, allow only numbers and '+'
+    if (name === 'whatsapp') {
+      const sanitized = value.replace(/[^0-9+]/g, '');
+      setFormData(prev => ({ ...prev, [name]: sanitized }));
+      return;
+    }
     setFormData(prev => ({ ...prev, [name]: value }));
   };
+
 
   const calculateTotal = () => {
     let total = (trip.package?.price || 0) * (trip.guests || 2);
@@ -185,21 +191,20 @@ export const BookingEngine = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">WhatsApp Number</label>
-                    <PhoneInput
-                      country={'ke'}
-                      value={formData.whatsapp}
-                      onChange={phone => handleInputChange({ target: { name: 'whatsapp', value: phone } })}
-                      containerClass="premium-phone-container-light"
-                      inputClass="premium-phone-input-light"
-                      buttonClass="premium-phone-button-light"
-                      dropdownClass="premium-phone-dropdown"
-                      placeholder="718 592 358"
-                      inputProps={{
-                        name: 'whatsapp',
-                        required: true,
-                        autoFocus: false
-                      }}
-                    />
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-400 group-focus-within:text-gold transition-colors">
+                        <Phone size={18} />
+                      </div>
+                      <input 
+                        type="tel"
+                        name="whatsapp"
+                        value={formData.whatsapp}
+                        onChange={handleInputChange}
+                        placeholder="WhatsApp Number (e.g. +254 718 592 358)"
+                        className="w-full bg-ivory border border-gold/10 p-5 pl-12 rounded-custom font-body focus:border-gold focus:outline-none transition-all placeholder:text-zinc-400"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="space-y-2">
