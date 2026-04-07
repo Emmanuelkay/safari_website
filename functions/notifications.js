@@ -4,7 +4,6 @@
  */
 
 import admin from "firebase-admin";
-import twilio from "twilio";
 import nodemailer from "nodemailer";
 
 /**
@@ -60,29 +59,8 @@ async function sendEmail({ to, subject, html }) {
 }
 
 async function sendWhatsAppMessage({ to, message }) {
-  const accountSid = process.env.TWILIO_ACCOUNT_SID;
-  const authToken = process.env.TWILIO_AUTH_TOKEN;
-  const fromNumber = process.env.TWILIO_WHATSAPP_NUMBER;
-
-  if (!accountSid || !authToken || !fromNumber) {
-    console.error("[WhatsApp] Missing Twilio credentials. Skipping message.");
-    return { success: false, error: "Missing Credentials" };
-  }
-
-  const client = twilio(accountSid, authToken);
-
-  try {
-    const result = await client.messages.create({
-      body: message,
-      from: fromNumber,
-      to: `whatsapp:${to}`
-    });
-    console.log(`[WhatsApp] Success! SID: ${result.sid}`);
-    return { success: true, sid: result.sid };
-  } catch (error) {
-    console.error("[WhatsApp] Twilio Error:", error);
-    return { success: false, error: error.message };
-  }
+  console.log(`[WhatsApp-DISABLED] Would have sent to ${to}: ${message}`);
+  return { success: true, message: "WhatsApp Disabled" };
 }
 
 /**
@@ -197,25 +175,15 @@ export async function sendPaymentFailedEmail(booking) {
  * ─── ADMIN NOTIFICATIONS ─────────────────────
  */
 
-export async function sendAdminAlert(booking, amountPaid) {
-  const adminMessage = `💰 *NEW PAYMENT RECEIVED*
-
-*Ref:* ${booking.ref}
-*Guest:* ${booking.travelerName}
-*Package:* ${booking.packageName}
-*Travel date:* ${formatDate(booking.travelDate)}
-*Amount paid:* $${amountPaid} USD (PayPal)
-*Traveler email:* ${booking.travelerEmail}
-*Traveler WhatsApp:* ${booking.travelerWhatsApp}
-
-Action required: Send itinerary within 24 hours.
-Dashboard: https://savannabeyond.co.ke/admin/bookings/${booking.ref}`;
-
-  await sendWhatsAppMessage({ to: process.env.ADMIN_WHATSAPP_NUMBER, message: adminMessage });
+export async function sendAdminAlert(booking, amountPaid, isFraud = false) {
+  const expectedDeposit = (booking.totalAmount || booking.totalAmountUSD || 0) * 0.3;
+  const adminMessage = isFraud 
+    ? `🚨 *SECURITY ALERT: POSSIBLE FRAUD* 🚨\n\n*Amount Manipulation Attempt Detected via External Tool (e.g. Burp Suite)!*\n\n*Ref:* ${booking.ref}\n*Guest:* ${booking.travelerName}\n*Amount Captured:* $${amountPaid} USD\n*Required Deposit:* $${expectedDeposit.toFixed(2)} USD\n\n⚠️ *Action:* Do NOT confirm this booking. Verify the transaction in the PayPal dashboard immediately.`
+    : `💰 *NEW PAYMENT RECEIVED*\n\n*Ref:* ${booking.ref}\n*Guest:* ${booking.travelerName}\n*Package:* ${booking.packageName}\n*Travel date:* ${formatDate(booking.travelDate)}\n*Amount paid:* $${amountPaid} USD (PayPal)\n*Traveler email:* ${booking.travelerEmail}\n*Traveler WhatsApp:* ${booking.travelerWhatsApp}\n\nAction required: Send itinerary within 24 hours.\nDashboard: https://savannabeyond.co.ke/admin/bookings/${booking.ref}`;
 
   await sendEmail({
     to: 'expeditions@savannabeyond.co.ke',
-    subject: `💰 Payment Received — ${booking.ref} — $${amountPaid}`,
+    subject: isFraud ? `🚨 FRAUD ALERT — ${booking.ref} — $${amountPaid}` : `💰 Payment Received — ${booking.ref} — $${amountPaid}`,
     html: `<p>${adminMessage.replace(/\n/g, '<br>')}</p>`
   });
 }

@@ -47,8 +47,18 @@ export const BookingEngine = () => {
     try {
       const refId = `SNB-2026-${Math.floor(1000 + Math.random() * 9000)}`;
       
-      // If payment is PayPal, we open the checkout modal. 
-      // We will save to DB only after or during the checkout flow to ensure consistency.
+      // Save the booking to Firestore FIRST, so the backend validation doesn't fail
+      await addDoc(collection(db, "bookings"), {
+        ...formData,
+        ...trip,
+        packageName: trip.package?.title,
+        totalAmount: calculateTotal(),
+        ref: refId,           // Changed from bookingRef to map to backend query
+        bookingRef: refId,    // Kept for frontend compatibility
+        status: 'ENQUIRY',
+        createdAt: serverTimestamp(),
+      });
+
       if (formData.paymentMethod === 'paypal') {
         setBookingRef(refId);
         setIsCheckoutOpen(true);
@@ -57,15 +67,6 @@ export const BookingEngine = () => {
       }
 
       // Standard enquiry flow for other methods
-      await addDoc(collection(db, "bookings"), {
-        ...formData,
-        ...trip,
-        packageName: trip.package?.title,
-        totalAmount: calculateTotal(),
-        bookingRef: refId,
-        status: 'ENQUIRY',
-        createdAt: serverTimestamp(),
-      });
       setBookingRef(refId);
       setStep(5);
     } catch (error) {
@@ -251,7 +252,7 @@ export const BookingEngine = () => {
                 <div className="bg-ivory/50 border border-gold/20 p-10 rounded-custom space-y-6 relative overflow-hidden">
                   <div className="flex items-center gap-6 mb-4">
                     <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-lg border border-gold/10">
-                      <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-mark-color.svg" alt="PayPal" className="h-8 w-8" />
+                      <ShieldCheck className="w-8 h-8 text-gold" />
                     </div>
                     <div>
                       <h4 className="text-[14px] font-bold text-charcoal uppercase tracking-widest mb-1">Secure PayPal Gateway</h4>
@@ -355,6 +356,7 @@ export const BookingEngine = () => {
           ...trip,
           packageName: trip.package?.title,
           totalAmount: calculateTotal(),
+          ref: bookingRef,
           bookingRef: bookingRef,
           depositAmount: calculateTotal() * 0.3
         }}

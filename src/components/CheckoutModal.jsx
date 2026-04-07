@@ -170,48 +170,55 @@ export const CheckoutModal = ({ isOpen, onClose, amount = 0, tripDetails = "", b
 
   if (!isOpen) return null;
 
-  const handleCreateOrder = async () => {
-    try {
-      const createPayPalPayment = httpsCallable(functions, 'createPayPalPayment');
-      const res = await createPayPalPayment({
-        bookingRef: booking.ref,
-        packageName: booking.packageName,
-        amountUSD: booking.depositAmount,
-        paymentType: 'deposit',
-        travelerEmail: booking.email,
-        travelerName: booking.name,
-        travelers: booking.travelers,
-        travelDate: booking.travelDate
-      });
-      return res.data.orderID;
-    } catch (error) {
-      console.error("PayPal Initiation Error:", error);
-      setPaymentState(STATES.FAILED);
-      setErrorMessage(error.message || "Could not establish secure payment handshake.");
-    }
+  const handleCreateOrder = (data, actions) => {
+    return actions.order.create({
+      intent: 'CAPTURE',
+      purchase_units: [{
+        reference_id: booking.ref,
+        description: `${booking.packageName} | 30% Deposit — Savanna & Beyond`,
+        custom_id: booking.ref,
+        soft_descriptor: 'SAVANNA&BEYOND',
+        amount: {
+          currency_code: 'USD',
+          value: booking.depositAmount.toFixed(2),
+          breakdown: {
+            item_total: { currency_code: 'USD', value: booking.depositAmount.toFixed(2) }
+          }
+        },
+        items: [{
+          name: booking.packageName,
+          description: `30% deposit payment | ${booking.travelers} travelers | Departing ${booking.travelDate}`,
+          unit_amount: { currency_code: 'USD', value: booking.depositAmount.toFixed(2) },
+          quantity: '1',
+          category: 'DIGITAL_GOODS'
+        }]
+      }],
+      payment_source: {
+        paypal: {
+          experience_context: {
+            payment_method_preference: 'IMMEDIATE_PAYMENT_REQUIRED',
+            brand_name: 'Savanna & Beyond',
+            locale: 'en-US',
+            landing_page: 'LOGIN',
+            shipping_preference: 'NO_SHIPPING',
+            user_action: 'PAY_NOW'
+          }
+        }
+      }
+    });
   };
 
-  const handleApprove = async (data) => {
+  const handleApprove = async (data, actions) => {
     try {
       setPaymentState(STATES.PROCESSING);
-
-      const capturePayPalPayment = httpsCallable(functions, 'capturePayPalPayment');
-      const res = await capturePayPalPayment({
-        orderID: data.orderID,
-        bookingRef: booking.ref
-      });
-
-      if (res.data.status === 'PROCESSING') {
-        // Start the polling cycle for the webhook result
-        pollForConfirmation(booking.ref);
-      } else {
-        setPaymentState(STATES.FAILED);
-        setErrorMessage("Capture failed. Our team has been notified.");
-      }
+      await actions.order.capture();
+      
+      // Start polling Firestore to see when the Webhook completes the update
+      pollForConfirmation(booking.ref);
     } catch (error) {
       console.error("PayPal Capture Error:", error);
       setPaymentState(STATES.FAILED);
-      setErrorMessage(error.message || "Verification of deposit failed.");
+      setErrorMessage(error.message || "Payment was captured but our system is slow to confirm. Our team will contact you manually.");
     }
   };
 
@@ -298,7 +305,7 @@ export const CheckoutModal = ({ isOpen, onClose, amount = 0, tripDetails = "", b
                 <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-12 md:p-16 flex-1 flex flex-col justify-center">
                    <div className="mb-12 p-8 bg-ivory/30 border border-gold/10 rounded-custom flex items-center gap-6">
                       <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md">
-                        <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-mark-color.svg" alt="PayPal" className="h-7 w-7" />
+                          <ShieldCheck className="w-7 h-7 text-gold" />
                       </div>
                       <div>
                         <h5 className="text-[14px] font-bold text-charcoal uppercase tracking-[0.2em] mb-1">Trusted Checkout</h5>

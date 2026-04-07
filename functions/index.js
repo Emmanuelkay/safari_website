@@ -19,6 +19,7 @@ const PAYPAL_API = process.env.PAYPAL_MODE === "live"
 
 const allowedOrigins = [
   "http://localhost:5173",
+  "http://localhost:4173",
   "https://safari-web-2026-10649.web.app",
   "https://safari-web-2026-10649.firebaseapp.com",
   "https://savannabeyond.co.ke"
@@ -30,6 +31,11 @@ const allowedOrigins = [
 async function getPayPalAccessToken() {
   const clientId = process.env.PAYPAL_CLIENT_ID;
   const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+  
+  if (!clientId || !clientSecret) {
+    throw new Error("Missing PayPal credentials in Secret Manager.");
+  }
+
   const auth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
 
   const response = await fetch(`${PAYPAL_API}/v1/oauth2/token`, {
@@ -42,217 +48,22 @@ async function getPayPalAccessToken() {
   });
 
   const data = await response.json();
-  if (!response.ok) throw new Error("Failed to get PayPal access token");
+  if (!response.ok) {
+    console.error("[PayPal Auth] Response:", JSON.stringify(data));
+    throw new Error(`PayPal Access Token Error: ${data.error_description || data.error || response.statusText}`);
+  }
   return data.access_token;
 }
 
-/**
- * 📝 Endpoint 1: Create PayPal Order
- */
-export const createPayPalPayment = onCall({
-  secrets: [
-    "PAYPAL_CLIENT_ID", "PAYPAL_CLIENT_SECRET", "PAYPAL_MODE",
-    "TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_WHATSAPP_NUMBER"
-  ],
-  cors: allowedOrigins,
-}, async (request) => {
-  const { 
-    bookingRef, 
-    packageName, 
-    amountUSD, 
-    paymentType, 
-    travelerEmail, 
-    travelerName,
-    travelers,
-    travelDate
-  } = request.data;
+// [The createPayPalPayment and capturePayPalPayment functions have been removed as part of the shift to client-side initiation]
 
-  // 1. Validate Booking in Firestore
-  const bookingSnap = await admin.firestore().collection("bookings")
-    .where("ref", "==", bookingRef)
-    .limit(1)
-    .get();
-
-  if (bookingSnap.empty) {
-    throw new HttpsError("not-found", "Booking reference not found.");
-  }
-
-  const booking = bookingSnap.docs[0].data();
-  const allowedStatuses = ['ENQUIRY', 'QUOTE_SENT', 'DEPOSIT_PENDING', 'INITIATED'];
-  if (!allowedStatuses.includes(booking.status)) {
-    throw new HttpsError("failed-precondition", "Booking is not in a payable state.");
-  }
-
-  try {
-    const accessToken = await getPayPalAccessToken();
-
-    // 2. Create PayPal Order
-    const orderPayload = {
-      intent: 'CAPTURE',
-      purchase_units: [{
-        reference_id: bookingRef,
-        description: `${packageName} — ${paymentType === 'deposit' ? '30% Deposit' : 'Full Payment'} | Savanna & Beyond`,
-        custom_id: bookingRef,
-        soft_descriptor: 'SAVANNA&BEYOND',
-        amount: {
-          currency_code: 'USD',
-          value: amountUSD.toFixed(2),
-          breakdown: {
-            item_total: { currency_code: 'USD', value: amountUSD.toFixed(2) }
-          }
-        },
-        items: [{
-          name: packageName,
-          description: `${paymentType === 'deposit' ? '30% deposit' : 'Full payment'} — ${travelers} traveler(s), departing ${travelDate}`,
-          unit_amount: { currency_code: 'USD', value: amountUSD.toFixed(2) },
-          quantity: '1',
-          category: 'DIGITAL_GOODS'
-        }]
-      }],
-      payment_source: {
-        paypal: {
-          experience_context: {
-            payment_method_preference: 'IMMEDIATE_PAYMENT_REQUIRED',
-            brand_name: 'Savanna & Beyond',
-            locale: 'en-US',
-            landing_page: 'LOGIN',
-            shipping_preference: 'NO_SHIPPING',
-            user_action: 'PAY_NOW',
-            return_url: `${process.env.APP_BASE_URL || "https://savannabeyond.co.ke"}/booking/confirmation?ref=${bookingRef}`,
-            cancel_url: `${process.env.APP_BASE_URL || "https://savannabeyond.co.ke"}/booking/cancelled?ref=${bookingRef}`
-          }
-        }
-      }
-    };
-
-    const response = await fetch(`${PAYPAL_API}/v2/checkout/orders`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
-        'PayPal-Request-Id': `${bookingRef}-${Date.now()}`,
-      },
-      body: JSON.stringify(orderPayload)
-    });
-
-    const order = await response.json();
-    if (!response.ok) throw new Error(order.message || "Failed to create PayPal order.");
-
-    // 3. Save PENDING record to Data Connect
-    const mutation = `
-      mutation CreatePayment($amount: Float!, $currency: String!, $status: String!, $paymentMethod: String!, $bookingRef: String!, $travelerEmail: String, $travelerName: String, $paymentType: String, $paypalOrderId: String) {
-        payment_insert(data: {
-          amount: $amount,
-          currency: $currency,
-          status: $status,
-          paymentMethod: $paymentMethod,
-          bookingRef: $bookingRef,
-          travelerEmail: $travelerEmail,
-          travelerName: $travelerName,
-          paymentType: $paymentType,
-          paypalOrderId: $paypalOrderId
-        })
-      }
-    `;
-
-    await dataConnect.executeGraphql(mutation, {
-      variables: {
-        amount: parseFloat(amountUSD),
-        currency: 'USD',
-        status: 'PENDING',
-        paymentMethod: 'PayPal',
-        bookingRef,
-        travelerEmail,
-        travelerName,
-        paymentType,
-        paypalOrderId: order.id
-      }
-    });
-
-    // 4. Update Booking status to INITIATED
-    await bookingSnap.docs[0].ref.update({
-      status: 'INITIATED',
-      lastUpdated: admin.firestore.FieldValue.serverTimestamp()
-    });
-
-    return { orderID: order.id };
-  } catch (error) {
-    console.error("PayPal Order Creation Failed:", error);
-    throw new HttpsError("internal", error.message || "Payment initiation failed.");
-  }
-});
-
-/**
- * 💳 Endpoint 2: Capture PayPal Order
- */
-export const capturePayPalPayment = onCall({
-  secrets: ["PAYPAL_CLIENT_ID", "PAYPAL_CLIENT_SECRET", "PAYPAL_MODE"],
-  cors: allowedOrigins,
-}, async (request) => {
-  const { orderID, bookingRef } = request.data;
-
-  try {
-    const accessToken = await getPayPalAccessToken();
-
-    // 1. Capture the payment
-    const response = await fetch(`${PAYPAL_API}/v2/checkout/orders/${orderID}/capture`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-        "PayPal-Request-Id": `capture-${orderID}`
-      },
-    });
-
-    const captureData = await response.json();
-    if (!response.ok) {
-       // Mark failed in DB
-       const mutation = `
-         mutation UpdatePaymentStatus($paypalOrderId: String!, $status: String!) {
-           payment_update(where: { paypalOrderId: { eq: $paypalOrderId } }, data: { status: $status })
-         }
-       `;
-       await dataConnect.executeGraphql(mutation, { variables: { paypalOrderId: orderID, status: 'FAILED' } });
-       throw new Error(captureData.message || "Payment capture failed.");
-    }
-
-    const captureId = captureData.purchase_units[0].payments.captures[0].id;
-    const captureStatus = captureData.purchase_units[0].payments.captures[0].status;
-
-    // 2. Update status to AWAITING_WEBHOOK
-    const mutation = `
-      mutation UpdatePaymentStatus($paypalOrderId: String!, $status: String!, $paypalCaptureId: String, $captureStatus: String) {
-        payment_update(where: { paypalOrderId: { eq: $paypalOrderId } }, data: { 
-          status: $status, 
-          paypalCaptureId: $paypalCaptureId, 
-          captureStatus: $captureStatus 
-        })
-      }
-    `;
-    await dataConnect.executeGraphql(mutation, {
-      variables: {
-        paypalOrderId: orderID,
-        status: 'AWAITING_WEBHOOK',
-        paypalCaptureId: captureId,
-        captureStatus: captureStatus
-      }
-    });
-
-    return { status: 'PROCESSING', orderID, captureID: captureId };
-  } catch (error) {
-    console.error("PayPal Capture Failed:", error);
-    throw new HttpsError("internal", error.message || "Payment verification failed.");
-  }
-});
 
 /**
  * 🪝 Endpoint 3: PayPal Webhook (The Source of Truth)
  */
 export const paypalWebhook = onRequest({
   secrets: [
-    "PAYPAL_CLIENT_ID", "PAYPAL_CLIENT_SECRET", "PAYPAL_MODE", "PAYPAL_WEBHOOK_ID",
-    "TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_WHATSAPP_NUMBER", "ADMIN_WHATSAPP_NUMBER",
-    "SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS", "SMTP_FROM"
+    "PAYPAL_CLIENT_ID", "PAYPAL_CLIENT_SECRET", "PAYPAL_MODE", "PAYPAL_WEBHOOK_ID"
   ],
 }, async (req, res) => {
   if (req.method !== 'POST') return res.status(405).send("Method Not Allowed");
@@ -323,41 +134,38 @@ async function handlePaymentSuccess(resource) {
      return;
   }
 
-  // 1. Update Payment Status in Data Connect
-  const mutation = `
-    mutation ConfirmPayment($paypalCaptureId: String!, $status: String!, $paypalEventId: String, $amountConfirmed: Float, $confirmedAt: Timestamp) {
-      payment_update(where: { paypalCaptureId: { eq: $paypalCaptureId } }, data: {
-        status: $status,
-        paypalEventId: $paypalEventId,
-        amountConfirmed: $amountConfirmed,
-        confirmedAt: $confirmedAt
-      })
-    }
-  `;
-  await dataConnect.executeGraphql(mutation, {
-    variables: {
-      paypalCaptureId: captureId,
-      status: 'CONFIRMED',
-      paypalEventId: resource.id,
-      amountConfirmed: parseFloat(amountPaid),
-      confirmedAt: new Date().toISOString()
-    }
-  });
-
-  // 2. Update Booking Status in Firestore
+  // 1. Update Booking Status in Firestore
   const bookingSnap = await admin.firestore().collection("bookings").where("ref", "==", bookingRef).limit(1).get();
   if (bookingSnap.empty) return;
   
   const bookingDoc = bookingSnap.docs[0];
   const bookingData = bookingDoc.data();
   
-  const totalAmount = bookingData.totalAmountUSD || 0;
-  const balanceDue = Math.max(0, totalAmount - parseFloat(amountPaid));
+  const totalAmount = bookingData.totalAmount || bookingData.totalAmountUSD || 0;
+  const actualPaid = parseFloat(amountPaid);
+  const expectedDeposit = totalAmount * 0.3;
+
+  // 🛡️ SECURITY: Anti-Manipulation Validation
+  // Ensure the amount paid matches the expected 30% deposit (within a small margin)
+  if (actualPaid < (expectedDeposit - 0.05)) {
+    console.error(`[SECURITY ALERT] Possible Amount Manipulation Attempt! Ref: ${bookingRef} | Expected: ${expectedDeposit} | Paid: ${actualPaid}`);
+    await bookingDoc.ref.update({
+      status: 'FLAGGED_UNDERPAID',
+      depositPaid: actualPaid,
+      paypalCaptureId: captureId,
+      lastUpdated: admin.firestore.FieldValue.serverTimestamp()
+    });
+    // Notify admin specifically about potential fraud/manipulation
+    await notifications.sendAdminAlert(bookingData, actualPaid, true);
+    return;
+  }
+
+  const balanceDue = Math.max(0, totalAmount - actualPaid);
   const newStatus = balanceDue <= 0 ? 'CONFIRMED_FULL' : 'CONFIRMED_DEPOSIT';
 
   await bookingDoc.ref.update({
     status: newStatus,
-    depositPaid: parseFloat(amountPaid),
+    depositPaid: actualPaid,
     depositPaidAt: admin.firestore.FieldValue.serverTimestamp(),
     balanceDue: balanceDue,
     paymentMethod: 'PAYPAL',
@@ -373,21 +181,14 @@ async function handlePaymentSuccess(resource) {
 
   // 3. Trigger Notifications
   await Promise.allSettled([
-    notifications.sendTravelerConfirmationEmail(bookingData, amountPaid, balanceDue),
-    notifications.sendTravelerWhatsApp(bookingData, amountPaid, balanceDue),
-    notifications.sendAdminAlert(bookingData, amountPaid)
+    notifications.sendTravelerConfirmationEmail(bookingData, actualPaid, balanceDue),
+    notifications.sendTravelerWhatsApp(bookingData, actualPaid, balanceDue),
+    notifications.sendAdminAlert(bookingData, actualPaid)
   ]);
 }
 
 async function handlePaymentDenied(resource) {
   const bookingRef = resource.custom_id;
-  const query = `mutation FailPayment($paypalCaptureId: String!, $status: String!, $deniedAt: Timestamp) { 
-    payment_update(where: { paypalCaptureId: { eq: $paypalCaptureId } }, data: { status: $status, deniedAt: $deniedAt }) 
-  }`;
-  await dataConnect.executeGraphql(query, { 
-    variables: { paypalCaptureId: resource.id, status: 'DENIED', deniedAt: new Date().toISOString() } 
-  });
-
   const bookingSnap = await admin.firestore().collection("bookings").where("ref", "==", bookingRef).limit(1).get();
   if (!bookingSnap.empty) {
     await bookingSnap.docs[0].ref.update({ status: 'PAYMENT_FAILED' });

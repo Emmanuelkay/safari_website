@@ -17,7 +17,7 @@ import { PayPalScriptProvider } from '@paypal/react-paypal-js'
 import { SetupAdmin } from './components/admin/SetupAdmin'
 
 const PAYPAL_OPTIONS = {
-  "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID || "AThFofUKMpxD6qNfID5Tvq3rovbxFumzroZRHz_pg9S5_ve0EuWwZSLIl_MVwB4sPOustkY_nVmvX-7E",
+  "client-id": "Ac2BqCCX6oo9fJaNOo4tLiY7gOChpQkI1jhqI_ENWsVr2JAyD5HD4VkRetlBgUkjXbN1J0bVS4eyVQsE",
   components: "buttons",
   currency: "USD",
   intent: "capture"
@@ -43,15 +43,15 @@ function App() {
         <Router>
           <Routes>
             {/* Public Website */}
-            <Route 
-              path="/" 
+            <Route
+              path="/"
               element={
                 <PublicLayout>
                   <Home />
                 </PublicLayout>
-              } 
+              }
             />
-            
+
             {/* Admin Routes */}
             <Route path="/admin/setup" element={<SetupAdmin />} />
             <Route path="/admin/login" element={<Login />} />
