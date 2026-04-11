@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  PayPalButtons, 
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  PayPalScriptProvider,
+  PayPalButtons,
   usePayPalScriptReducer
 } from '@paypal/react-paypal-js';
 import { httpsCallable } from 'firebase/functions';
@@ -9,6 +10,13 @@ import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShieldCheck, CheckCircle2, AlertCircle, MessageCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
+const PAYPAL_OPTIONS = {
+  "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID,
+  components: "buttons",
+  currency: "USD",
+  intent: "capture"
+};
 
 const STATES = {
   IDLE: 'idle',
@@ -125,13 +133,42 @@ const FailedView = ({ message, booking, onRetry }) => (
 );
 
 /**
- * 👑 Checkout Modal
+ * 👑 Checkout Modal — PayPal SDK loads only when modal opens
  */
-export const CheckoutModal = ({ isOpen, onClose, amount = 0, tripDetails = "", bookingData = null }) => {
+export const CheckoutModal = ({ isOpen, ...props }) => {
+  if (!isOpen) return null;
+
+  return (
+    <PayPalScriptProvider options={PAYPAL_OPTIONS}>
+      <CheckoutModalInner isOpen={isOpen} {...props} />
+    </PayPalScriptProvider>
+  );
+};
+
+const CheckoutModalInner = ({ isOpen, onClose, amount = 0, tripDetails = "", bookingData = null }) => {
   const { t } = useTranslation();
   const [paymentState, setPaymentState] = useState(STATES.IDLE);
   const [errorMessage, setErrorMessage] = useState('');
   const [{ isPending }] = usePayPalScriptReducer();
+
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen && modalRef.current) {
+      modalRef.current.focus();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && paymentState !== STATES.PROCESSING) {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, paymentState, onClose]);
 
   const booking = {
     ref: bookingData?.ref || "SNB-PENDING",
@@ -144,16 +181,18 @@ export const CheckoutModal = ({ isOpen, onClose, amount = 0, tripDetails = "", b
   };
 
   const pollForConfirmation = async (bookingRef, attempts = 0) => {
-    if (attempts > 30) { // 1.5 minutes max
-      setPaymentState(STATES.SUCCESS); // Fallback success (delayed confirmation)
+    const MAX_ATTEMPTS = 20;
+    if (attempts >= MAX_ATTEMPTS) {
+      setPaymentState(STATES.FAILED);
+      setErrorMessage(
+        "Payment confirmation is taking longer than expected. Your payment may still be processing — please don't retry yet. Our team will contact you shortly, or reach out via WhatsApp."
+      );
       return;
     }
 
     try {
       const getBookingPaymentStatus = httpsCallable(functions, 'getBookingPaymentStatus');
       const { data } = await getBookingPaymentStatus({ bookingRef });
-      
-      console.log(`[Polling] ${bookingRef} Status: ${data.status}`);
 
       if (['CONFIRMED_DEPOSIT', 'CONFIRMED_FULL'].includes(data.status)) {
         setPaymentState(STATES.SUCCESS);
@@ -161,53 +200,21 @@ export const CheckoutModal = ({ isOpen, onClose, amount = 0, tripDetails = "", b
         setPaymentState(STATES.FAILED);
         setErrorMessage("Payment was declined by the provider.");
       } else {
-        // Still processing or initiated, wait 3s and retry
-        setTimeout(() => pollForConfirmation(bookingRef, attempts + 1), 3000);
+        const delay = Math.min(3000 * Math.pow(1.5, attempts), 15000);
+        setTimeout(() => pollForConfirmation(bookingRef, attempts + 1), delay);
       }
-    } catch (error) {
-      console.error("[Polling] Error:", error);
-      setTimeout(() => pollForConfirmation(bookingRef, attempts + 1), 5000);
+    } catch {
+      const delay = Math.min(5000 * Math.pow(1.5, attempts), 20000);
+      setTimeout(() => pollForConfirmation(bookingRef, attempts + 1), delay);
     }
   };
 
-  if (!isOpen) return null;
-
-  const handleCreateOrder = (data, actions) => {
-    return actions.order.create({
-      intent: 'CAPTURE',
-      purchase_units: [{
-        reference_id: booking.ref,
-        description: `${booking.packageName} | Full Payment — Savanna & Beyond`,
-        custom_id: booking.ref,
-        soft_descriptor: 'SAVANNA&BEYOND',
-        amount: {
-          currency_code: 'USD',
-          value: booking.depositAmount.toFixed(2),
-          breakdown: {
-            item_total: { currency_code: 'USD', value: booking.depositAmount.toFixed(2) }
-          }
-        },
-        items: [{
-          name: booking.packageName,
-          description: `Full payment | ${booking.travelers} travelers | Departing ${booking.travelDate}`,
-          unit_amount: { currency_code: 'USD', value: booking.depositAmount.toFixed(2) },
-          quantity: '1',
-          category: 'DIGITAL_GOODS'
-        }]
-      }],
-      payment_source: {
-        paypal: {
-          experience_context: {
-            payment_method_preference: 'IMMEDIATE_PAYMENT_REQUIRED',
-            brand_name: 'Savanna & Beyond',
-            landing_page: 'LOGIN',
-            shipping_preference: 'NO_SHIPPING',
-            user_action: 'PAY_NOW'
-          }
-
-        }
-      }
-    });
+  const handleCreateOrder = async () => {
+    // Server-side order creation ONLY — amount comes from Firestore, not the browser.
+    // This prevents price manipulation via DevTools.
+    const createOrder = httpsCallable(functions, 'createPayPalOrder');
+    const result = await createOrder({ bookingRef: booking.ref });
+    return result.data.orderId;
   };
 
   const handleApprove = async (data, actions) => {
@@ -218,14 +225,13 @@ export const CheckoutModal = ({ isOpen, onClose, amount = 0, tripDetails = "", b
       // Start polling Firestore to see when the Webhook completes the update
       pollForConfirmation(booking.ref);
     } catch (error) {
-      console.error("PayPal Capture Error:", error);
       setPaymentState(STATES.FAILED);
       setErrorMessage(error.message || "Payment was captured but our system is slow to confirm. Our team will contact you manually.");
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <div role="dialog" aria-modal="true" aria-label="Checkout" ref={modalRef} tabIndex={-1} className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 lg:p-8">
       {/* Editorial Backdrop */}
       <motion.div 
         initial={{ opacity: 0 }}
@@ -239,7 +245,7 @@ export const CheckoutModal = ({ isOpen, onClose, amount = 0, tripDetails = "", b
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="relative bg-white w-full max-w-5xl rounded-custom shadow-[0_30px_100px_rgba(0,0,0,0.6)] overflow-hidden flex flex-col md:flex-row min-h-[620px]"
+        className="relative bg-white w-full max-w-xl md:max-w-4xl lg:max-w-5xl rounded-custom shadow-[0_30px_100px_rgba(0,0,0,0.6)] overflow-hidden flex flex-col md:flex-row min-h-[620px]"
       >
         {/* Left: Summary Panel */}
         <div className="bg-ivory p-12 md:w-[40%] border-b md:border-b-0 md:border-r border-gold/10 flex flex-col justify-between relative overflow-hidden">
@@ -284,7 +290,7 @@ export const CheckoutModal = ({ isOpen, onClose, amount = 0, tripDetails = "", b
         {/* Right: Payment Processor */}
         <div className="md:w-[60%] flex flex-col relative bg-white min-h-[400px]">
           {paymentState !== STATES.PROCESSING && (
-            <button onClick={onClose} className="absolute top-8 right-8 text-zinc-300 hover:text-charcoal transition-colors z-20">
+            <button onClick={onClose} aria-label="Close checkout" className="absolute top-8 right-8 text-zinc-300 hover:text-charcoal transition-colors z-20">
               <X size={24} />
             </button>
           )}
@@ -317,21 +323,25 @@ export const CheckoutModal = ({ isOpen, onClose, amount = 0, tripDetails = "", b
 
                    <div className={cn("transition-opacity duration-300", isPending ? "opacity-30 pointer-events-none" : "opacity-100")}>
                       <PayPalButtons
-                        style={{ 
-                          layout: "vertical", 
-                          shape: "rect", 
-                          color: "gold", 
+                        style={{
+                          layout: "vertical",
+                          shape: "rect",
+                          color: "gold",
                           label: "pay",
                           height: 55
                         }}
                         createOrder={handleCreateOrder}
                         onApprove={handleApprove}
+                        onError={() => {
+                          setPaymentState(STATES.FAILED);
+                          setErrorMessage("Payment service is temporarily unavailable. Please try again or contact us via WhatsApp.");
+                        }}
                       />
                    </div>
 
                    {isPending && (
                      <div className="mt-6 text-center animate-pulse">
-                       <span className="text-[10px] uppercase font-bold tracking-[0.4em] text-gold">Establishing handshake...</span>
+                       <span className="text-[10px] uppercase font-bold tracking-[0.4em] text-gold">Loading payment options...</span>
                      </div>
                    )}
                    

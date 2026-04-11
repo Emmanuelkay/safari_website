@@ -17,7 +17,7 @@ export const SocialProof = () => {
   return (
     <section className="py-24 bg-ivory overflow-hidden">
       <div className="text-center mb-16">
-        <h2 className="text-4xl md:text-5xl font-heading text-midnight">{t('common.travelerStories')}</h2>
+        <h2 className="text-4xl md:text-5xl font-heading text-charcoal">{t('common.travelerStories')}</h2>
       </div>
 
       <div className="flex gap-8 animate-scroll hover:pause-animation">
@@ -30,7 +30,7 @@ export const SocialProof = () => {
           return (
             <div 
               key={idx} 
-              className="flex-shrink-0 w-[350px] md:w-[450px] bg-white p-10 rounded-custom border border-zinc-100 border-l-4 border-l-ochre group hover:shadow-lg transition-all"
+              className="flex-shrink-0 w-[350px] md:w-[450px] bg-white p-10 rounded-custom border border-zinc-100 border-l-4 border-l-gold group hover:shadow-lg transition-all"
             >
               <div className="flex gap-1 mb-6">
                 {[...Array(5)].map((_, i) => (
@@ -49,24 +49,6 @@ export const SocialProof = () => {
         })}
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes scroll {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(calc(-382px * ${reviews.length})); } /* width + gap */
-        }
-        @media (min-width: 768px) {
-          @keyframes scroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(calc(-482px * ${reviews.length})); }
-          }
-        }
-        .animate-scroll {
-          animation: scroll 60s linear infinite;
-        }
-        .pause-animation:hover {
-          animation-play-state: paused;
-        }
-      `}} />
     </section>
   );
 };

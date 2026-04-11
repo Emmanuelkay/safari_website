@@ -4,30 +4,8 @@ import { cn } from '../lib/utils';
 import { ItineraryModal } from './ItineraryModal';
 import { useTrip } from '../context/TripContext';
 import { useTranslation } from 'react-i18next';
-
-const packagesData = [
-  { id: 1, category: "city day-trips solo", image: "/pkg_nairobi_morning.png", price: 95, solo: 45, group: "$75pp for 4+", stay: { tier: "COMFORT", nights: 0, board: "N/A" } },
-  { id: 2, category: "city animal safari solo with-stays wildlife", image: "/pkg_nairobi_city_wild.png", price: 185, solo: 65, stay: { tier: "PREMIUM", nights: 1, board: "Full Board", room: "Forest-view room" } },
-  { id: 3, category: "city coast solo with-stays culture", image: "/dest_watamu.png", price: 160, solo: 55, stay: { tier: "PREMIUM", nights: 1, board: "Half Board", room: "Ocean-facing room" } },
-  { id: 4, category: "safari 3-days solo with-stays mara", image: "/dest_mara.png", price: 650, solo: 180, group: "$550pp for 4–6", stay: { tier: "COMFORT", nights: 2, board: "Full Board" } },
-  { id: 5, category: "safari 3-days solo with-stays amboseli", image: "/dest_amboseli.png", price: 720, solo: 200, stay: { tier: "COMFORT", nights: 2, board: "Full Board" } },
-  { id: 6, category: "safari 5-days combo solo with-stays", image: "/dest_naivasha.png", price: 1150, solo: 280, group: "$980pp for 4+", stay: { tier: "PREMIUM", nights: 4, board: "Full Board" } },
-  { id: 7, category: "city safari combo solo with-stays", image: "/dest_nairobi.png", price: 450, solo: 130, stay: { tier: "COMFORT", nights: 1, board: "B&B" } },
-  { id: 8, category: "safari 7-days city coast combo with-stays", image: "/wildlife_elephant.png", flagship: true, price: 2200, solo: 450, stay: { tier: "PREMIUM", nights: 6, board: "Mix (B&B/FB)" } }
-];
-
-const filterOptions = [
-  { label: 'common.all', value: 'all' },
-  { label: 'packages.filters.city', value: 'city' },
-  { label: 'packages.filters.days3', value: '3-days' },
-  { label: 'packages.filters.days5', value: '5-days' },
-  { label: 'packages.filters.days7', value: '7-days' },
-  { label: 'packages.filters.safari', value: 'safari' },
-  { label: 'packages.filters.combo', value: 'combo' },
-  { label: 'packages.filters.solo', value: 'solo' },
-  { label: 'packages.filters.withStays', value: 'with-stays' },
-  { label: 'packages.filters.dayTrips', value: 'day-trips' }
-];
+import { filterOptions } from '../data/packages';
+import { usePackages } from '../hooks/usePackages';
 
 const PackageCard = ({ pkg, onOpenItinerary }) => {
   const { t } = useTranslation();
@@ -51,10 +29,12 @@ const PackageCard = ({ pkg, onOpenItinerary }) => {
     )}>
       {/* Top Media */}
       <div className="h-64 relative overflow-hidden bg-black">
-        <img 
-          src={pkg.image} 
+        <img
+          src={pkg.image}
           alt={title}
           loading="lazy"
+          width={400}
+          height={256}
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-80"
         />
         <div className="absolute inset-0 bg-linear-to-b from-black/20 via-transparent to-black/60 opacity-60" />
@@ -160,12 +140,29 @@ const PackageCard = ({ pkg, onOpenItinerary }) => {
 
 export const Packages = () => {
   const { t } = useTranslation();
+  const { packages: packagesData } = usePackages();
   const [filter, setFilter] = useState('all');
   const [selectedPkg, setSelectedPkg] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openItinerary = (pkg) => {
-    setSelectedPkg(pkg);
+    // Merge structural data from config with translated text
+    const translatedItinerary = t(`packages.p${pkg.id}.itinerary`, { returnObjects: true });
+    const baseItinerary = pkg.itinerary || [];
+
+    const mergedItinerary = baseItinerary.map((day, i) => ({
+      ...day,
+      morning: translatedItinerary?.[i]?.morning || day.morning,
+      afternoon: translatedItinerary?.[i]?.afternoon || day.afternoon,
+      evening: translatedItinerary?.[i]?.evening || day.evening,
+      journal: translatedItinerary?.[i]?.journal || day.journal,
+    }));
+
+    setSelectedPkg({
+      ...pkg,
+      title: t(`packages.p${pkg.id}.title`),
+      itinerary: mergedItinerary,
+    });
     setIsModalOpen(true);
   };
 

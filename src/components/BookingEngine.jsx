@@ -30,8 +30,17 @@ export const BookingEngine = () => {
   const [success, setSuccess] = useState(false);
 
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const [submitting, setSubmitting] = useState(false);
+
+  const today = new Date().toISOString().split('T')[0];
 
   const nextStep = () => {
+    if (step === 1) {
+      if (trip.dates && trip.dates < today) {
+        alert(t('booking.alerts.pastDate') || 'Please select a future travel date.');
+        return;
+      }
+    }
     if (step === 2) {
       if (!formData.fullName || !formData.email || !formData.whatsapp) {
         alert(t('booking.alerts.fillDetails'));
@@ -67,14 +76,18 @@ export const BookingEngine = () => {
   };
 
   const handleSubmit = async () => {
+    if (submitting) return;
     if (!isValidEmail(formData.email)) {
       alert(t('booking.alerts.invalidEmail'));
       return;
     }
+    setSubmitting(true);
     setLoading(true);
 
     try {
-      const refId = `SNB-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+      const randomBytes = crypto.getRandomValues(new Uint8Array(6));
+      const hex = Array.from(randomBytes, b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+      const refId = `SNB-${hex}`;
       
       // SANITIZE DATA: Remove non-serializable React elements (icons)
       const sanitizedAddons = trip.addons.map(({ icon, ...rest }) => rest);
@@ -111,10 +124,10 @@ export const BookingEngine = () => {
       setBookingRef(refId);
       setStep(5);
     } catch (error) {
-      console.error("Booking failed:", error);
       alert(t('booking.alerts.error'));
     } finally {
       setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -140,7 +153,7 @@ export const BookingEngine = () => {
   }
 
   return (
-    <section id="booking" className="py-32 bg-white scroll-mt-20">
+    <section id="booking" className="py-32 bg-ivory/50 scroll-mt-20">
       <div className="max-w-[1200px] mx-auto px-10">
         <div className="grid lg:grid-cols-[1.5fr_1fr] gap-20">
           {/* Form Side */}
@@ -180,22 +193,25 @@ export const BookingEngine = () => {
 
                  <div className="grid grid-cols-2 gap-8">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('booking.step1.travelers')}</label>
-                    <input 
-                      type="number" 
+                    <label htmlFor="travelers" className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('booking.step1.travelers')}</label>
+                    <input
+                      id="travelers"
+                      type="number"
                       min="1"
                       value={trip.guests}
                       onChange={(e) => updateGuests(parseInt(e.target.value))}
-                      className="w-full bg-ivory border-gold/10 p-5 rounded-custom font-body"
+                      className="w-full bg-ivory border border-gold/20 p-5 rounded-custom font-body"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('booking.step1.preferredDate')}</label>
-                    <input 
-                      type="date" 
+                    <label htmlFor="travel-date" className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('booking.step1.preferredDate')}</label>
+                    <input
+                      id="travel-date"
+                      type="date"
                       value={trip.dates}
+                      min={today}
                       onChange={(e) => updateDates(e.target.value)}
-                      className="w-full bg-ivory border-gold/10 p-5 rounded-custom font-body"
+                      className="w-full bg-ivory border border-gold/20 p-5 rounded-custom font-body"
                     />
                   </div>
                 </div>
@@ -206,38 +222,47 @@ export const BookingEngine = () => {
             {step === 2 && (
               <div className="space-y-8 animate-in fade-in slide-in-from-right-4">
                  <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('booking.step2.fullName')}</label>
-                  <input 
+                  <label htmlFor="fullName" className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('booking.step2.fullName')}</label>
+                  <input
+                    id="fullName"
                     name="fullName"
                     value={formData.fullName}
                     onChange={handleInputChange}
                     placeholder="John Doe"
-                    className="w-full bg-ivory border-gold/10 p-5 rounded-custom font-body"
+                    autoComplete="name"
+                    maxLength={100}
+                    className="w-full bg-ivory border border-gold/20 p-5 rounded-custom font-body"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('booking.step2.email')}</label>
-                    <input 
+                    <label htmlFor="email" className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('booking.step2.email')}</label>
+                    <input
+                      id="email"
                       name="email"
                       type="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full bg-ivory border-gold/10 p-5 rounded-custom font-body"
+                      autoComplete="email"
+                      maxLength={254}
+                      className="w-full bg-ivory border border-gold/20 p-5 rounded-custom font-body"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('booking.step2.whatsapp')}</label>
+                    <label htmlFor="whatsapp" className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('booking.step2.whatsapp')}</label>
                     <div className="relative group">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-400 group-focus-within:text-gold transition-colors">
                         <Phone size={18} />
                       </div>
-                      <input 
+                      <input
+                        id="whatsapp"
                         type="tel"
                         name="whatsapp"
                         value={formData.whatsapp}
                         onChange={handleInputChange}
                         placeholder={t('booking.step2.whatsappPlaceholder')}
+                        autoComplete="tel"
+                        maxLength={20}
                         className="w-full bg-ivory border border-gold/10 p-5 pl-12 rounded-custom font-body focus:border-gold focus:outline-none transition-all placeholder:text-zinc-400"
                         required
                       />
@@ -245,13 +270,15 @@ export const BookingEngine = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                   <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('booking.step2.requests')}</label>
-                   <textarea 
+                   <label htmlFor="requests" className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('booking.step2.requests')}</label>
+                   <textarea
+                     id="requests"
                      name="requests"
                      value={formData.requests}
                      onChange={handleInputChange}
                      rows="4"
-                     className="w-full bg-ivory border-gold/10 p-5 rounded-custom font-body"
+                     maxLength={1000}
+                     className="w-full bg-ivory border border-gold/20 p-5 rounded-custom font-body"
                    />
                 </div>
               </div>
@@ -337,7 +364,7 @@ export const BookingEngine = () => {
               )}
               <button 
                 onClick={step === 4 ? handleSubmit : nextStep}
-                disabled={loading || (step === 1 && !trip.package)}
+                disabled={loading || submitting || (step === 1 && !trip.package)}
                 className="ml-auto bg-gold text-charcoal px-14 py-6 rounded-custom font-bold uppercase tracking-[0.3em] text-[12px] flex items-center gap-3 transition-transform hover:-translate-y-1 shadow-2xl disabled:opacity-50"
               >
                 {loading ? t('common.processing') : step === 4 ? t('booking.header.confirm') : t('common.nextStep')} <ChevronRight size={16} />

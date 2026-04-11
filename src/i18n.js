@@ -7,6 +7,7 @@ import esTranslation from './locales/es/translation.json';
 import deTranslation from './locales/de/translation.json';
 import frTranslation from './locales/fr/translation.json';
 import zhTranslation from './locales/zh/translation.json';
+import ruTranslation from './locales/ru/translation.json';
 
 i18n
   .use(LanguageDetector)
@@ -17,7 +18,8 @@ i18n
       es: { translation: esTranslation },
       de: { translation: deTranslation },
       fr: { translation: frTranslation },
-      zh: { translation: zhTranslation }
+      zh: { translation: zhTranslation },
+      ru: { translation: ruTranslation }
     },
     fallbackLng: 'en',
     detection: {
@@ -28,5 +30,12 @@ i18n
       escapeValue: false
     }
   });
+
+// Sync <html lang> attribute with current language
+i18n.on('languageChanged', (lng) => {
+  document.documentElement.setAttribute('lang', lng);
+});
+// Set initial lang
+document.documentElement.setAttribute('lang', i18n.language || 'en');
 
 export default i18n;

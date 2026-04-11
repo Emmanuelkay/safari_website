@@ -216,7 +216,162 @@ async function verifyPayPalWebhookSignature({ webhookId, webhookEvent, headers }
 }
 
 /**
- * 🔍 Endpoint 4: Get Booking Payment Status (for polling)
+ * 🛡️ Endpoint 4: Create PayPal Order (Server-Side — Prevents Price Manipulation)
+ * The client calls this INSTEAD of actions.order.create() to ensure the amount
+ * comes from the Firestore booking record, NOT from the browser.
+ */
+export const createPayPalOrder = onCall({
+  cors: allowedOrigins,
+  secrets: ["PAYPAL_CLIENT_ID", "PAYPAL_CLIENT_SECRET", "PAYPAL_MODE"],
+}, async (request) => {
+  const { bookingRef } = request.data;
+  if (!bookingRef) throw new HttpsError("invalid-argument", "Booking reference is required.");
+
+  // 1. Read the booking from Firestore (server-side source of truth)
+  const bookingSnap = await admin.firestore().collection("bookings")
+    .where("ref", "==", bookingRef)
+    .limit(1)
+    .get();
+
+  if (bookingSnap.empty) throw new HttpsError("not-found", "Booking not found.");
+  const booking = bookingSnap.docs[0].data();
+
+  // 2. Ensure booking is in a payable state
+  if (booking.status !== 'ENQUIRY') {
+    throw new HttpsError("failed-precondition", "This booking has already been processed.");
+  }
+
+  const amount = booking.totalAmount;
+  if (!amount || amount <= 0) {
+    throw new HttpsError("failed-precondition", "Invalid booking amount.");
+  }
+
+  // 3. Create the PayPal order with the server-verified amount
+  const accessToken = await getPayPalAccessToken();
+  const response = await fetch(`${PAYPAL_API}/v2/checkout/orders`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      intent: "CAPTURE",
+      purchase_units: [{
+        reference_id: bookingRef,
+        custom_id: bookingRef,
+        description: `${booking.packageName || 'Safari'} | Savanna & Beyond`,
+        soft_descriptor: "SAVANNA&BEYOND",
+        amount: {
+          currency_code: "USD",
+          value: amount.toFixed(2),
+        },
+      }],
+      payment_source: {
+        paypal: {
+          experience_context: {
+            payment_method_preference: "IMMEDIATE_PAYMENT_REQUIRED",
+            brand_name: "Savanna & Beyond",
+            landing_page: "LOGIN",
+            shipping_preference: "NO_SHIPPING",
+            user_action: "PAY_NOW",
+          },
+        },
+      },
+    }),
+  });
+
+  const order = await response.json();
+  if (!response.ok) {
+    throw new HttpsError("internal", `PayPal order creation failed: ${order.message || response.statusText}`);
+  }
+
+  // 4. Mark booking as payment-initiated to prevent double orders
+  await bookingSnap.docs[0].ref.update({
+    paypalOrderId: order.id,
+    lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+  });
+
+  return { orderId: order.id };
+});
+
+/**
+ * 🔍 Endpoint 5: Public Booking Lookup (ref + email verification)
+ */
+export const lookupBooking = onCall({
+  cors: allowedOrigins,
+}, async (request) => {
+  const { bookingRef, email } = request.data;
+  if (!bookingRef || !email) {
+    throw new HttpsError("invalid-argument", "Booking reference and email are required.");
+  }
+
+  const bookingSnap = await admin.firestore().collection("bookings")
+    .where("ref", "==", bookingRef)
+    .where("email", "==", email.toLowerCase().trim())
+    .limit(1)
+    .get();
+
+  if (bookingSnap.empty) {
+    throw new HttpsError("not-found", "No booking found with that reference and email combination.");
+  }
+
+  const booking = bookingSnap.docs[0].data();
+  // Return only safe, non-sensitive fields
+  return {
+    ref: booking.ref,
+    status: booking.status,
+    packageName: booking.packageName,
+    totalAmount: booking.totalAmount,
+    depositPaid: booking.depositPaid || 0,
+    travelDate: booking.dates || booking.trip?.dates || null,
+    guests: booking.guests || booking.trip?.guests || null,
+  };
+});
+
+/**
+ * 🔐 Endpoint 6: Admin Update Booking Status (authenticated only)
+ * Since Firestore rules block client updates, admins use this function.
+ */
+export const adminUpdateBookingStatus = onCall({
+  cors: allowedOrigins,
+}, async (request) => {
+  // Require authentication
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "You must be logged in.");
+  }
+
+  const { bookingId, newStatus } = request.data;
+  if (!bookingId || !newStatus) {
+    throw new HttpsError("invalid-argument", "bookingId and newStatus are required.");
+  }
+
+  const validStatuses = ['ENQUIRY', 'QUOTE_SENT', 'CONFIRMED_DEPOSIT', 'CONFIRMED_FULL', 'PAYMENT_FAILED', 'COMPLETED'];
+  if (!validStatuses.includes(newStatus)) {
+    throw new HttpsError("invalid-argument", `Invalid status. Must be one of: ${validStatuses.join(', ')}`);
+  }
+
+  const bookingRef = admin.firestore().collection("bookings").doc(bookingId);
+  const booking = await bookingRef.get();
+  if (!booking.exists) {
+    throw new HttpsError("not-found", "Booking not found.");
+  }
+
+  await bookingRef.update({
+    status: newStatus,
+    lastAdminAction: new Date().toISOString(),
+    lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+    activityLog: admin.firestore.FieldValue.arrayUnion({
+      event: `STATUS_CHANGED_TO_${newStatus}`,
+      by: request.auth.uid,
+      timestamp: new Date().toISOString()
+    })
+  });
+
+  return { success: true, newStatus };
+});
+
+/**
+ * 🔍 Endpoint 7: Get Booking Payment Status (for polling)
  */
 export const getBookingPaymentStatus = onCall({
   cors: allowedOrigins,

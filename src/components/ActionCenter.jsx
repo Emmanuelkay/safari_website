@@ -8,7 +8,7 @@ export const ActionCenter = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="fixed bottom-8 left-8 z-[100]">
+    <div className="fixed bottom-24 right-6 sm:bottom-8 sm:left-8 sm:right-auto z-[100]">
       {/* Trigger FAB */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
@@ -27,7 +27,7 @@ export const ActionCenter = () => {
 
       {/* Action Sheet */}
       <div className={cn(
-        "absolute bottom-20 left-0 w-80 bg-white rounded-custom shadow-[0_20px_100px_rgba(0,0,0,0.15)] border border-gold/10 transition-all duration-500 transform origin-bottom-left overflow-hidden",
+        "absolute bottom-20 right-0 sm:right-auto sm:left-0 w-80 bg-white rounded-custom shadow-[0_20px_100px_rgba(0,0,0,0.15)] border border-gold/10 transition-all duration-500 transform origin-bottom-right sm:origin-bottom-left overflow-hidden",
         isOpen ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-90 translate-y-10 pointer-events-none"
       )}>
         <div className="p-8 bg-ivory/50 border-b border-gold/10">

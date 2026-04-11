@@ -12,13 +12,13 @@ export const SEO = ({ title, description, url, isArticle = false, type = "websit
       <meta property="og:description" content={description} />
       <meta property="og:type" content={type} />
       <meta property="og:url" content={url} />
-      <meta property="og:image" content="https://savannabeyond.co.ke/og-image.jpg" />
+      <meta property="og:image" content="https://savannabeyond.co.ke/hero_bg.webp" />
       
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content="https://savannabeyond.co.ke/og-image.jpg" />
+      <meta name="twitter:image" content="https://savannabeyond.co.ke/hero_bg.webp" />
 
       {/* Canonical and Hreflang */}
       <link rel="canonical" href={url} />
@@ -27,14 +27,15 @@ export const SEO = ({ title, description, url, isArticle = false, type = "websit
       <link rel="alternate" hreflang="es" href={`${url}?lang=es`} />
       <link rel="alternate" hreflang="fr" href={`${url}?lang=fr`} />
       <link rel="alternate" hreflang="zh" href={`${url}?lang=zh`} />
+      <link rel="alternate" hreflang="ru" href={`${url}?lang=ru`} />
       <link rel="alternate" hreflang="x-default" href={url} />
 
       {/* Schema.org */}
-      {schemaData && (
-        <script type="application/ld+json">
-          {JSON.stringify(schemaData)}
+      {schemaData && (Array.isArray(schemaData) ? schemaData : [schemaData]).map((schema, i) => (
+        <script key={i} type="application/ld+json">
+          {JSON.stringify(schema)}
         </script>
-      )}
+      ))}
     </Helmet>
   );
 };

@@ -10,6 +10,16 @@ import nodemailer from "nodemailer";
  * ─── HELPERS ─────────────────────────────────
  */
 
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function formatDate(date) {
   if (!date) return "N/A";
   const d = new Date(date);
@@ -72,7 +82,7 @@ export async function sendTravelerConfirmationEmail(booking, amountPaid, balance
         <img src="https://savannabeyond.co.ke/logo.png" width="180" alt="Savanna & Beyond" />
         <h1 style="color: #3D2B1F; font-size: 28px; margin-top: 32px;">Your Safari is Confirmed.</h1>
         <p style="color: #6B6158; font-size: 16px; line-height: 1.7;">
-          Dear ${booking.travelerName},<br><br>
+          Dear ${escapeHtml(booking.travelerName)},<br><br>
           We have received your payment and your expedition is now secured. The Mara awaits.
         </p>
 
@@ -81,11 +91,11 @@ export async function sendTravelerConfirmationEmail(booking, amountPaid, balance
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
               <td style="color: #6B6158; padding: 8px 0; font-size: 14px;">Booking Reference</td>
-              <td style="color: #3D2B1F; font-weight: bold; text-align: right; font-size: 14px;">${booking.ref}</td>
+              <td style="color: #3D2B1F; font-weight: bold; text-align: right; font-size: 14px;">${escapeHtml(booking.ref)}</td>
             </tr>
             <tr>
               <td style="color: #6B6158; padding: 8px 0; font-size: 14px;">Package</td>
-              <td style="color: #3D2B1F; text-align: right; font-size: 14px;">${booking.packageName}</td>
+              <td style="color: #3D2B1F; text-align: right; font-size: 14px;">${escapeHtml(booking.packageName)}</td>
             </tr>
             <tr>
               <td style="color: #6B6158; padding: 8px 0; font-size: 14px;">Travel Date</td>
@@ -93,11 +103,11 @@ export async function sendTravelerConfirmationEmail(booking, amountPaid, balance
             </tr>
             <tr>
               <td style="color: #6B6158; padding: 8px 0; font-size: 14px;">Your Stay</td>
-              <td style="color: #3D2B1F; text-align: right; font-size: 14px;">${booking.lodgeName}</td>
+              <td style="color: #3D2B1F; text-align: right; font-size: 14px;">${escapeHtml(booking.lodgeName)}</td>
             </tr>
             <tr>
               <td style="color: #6B6158; padding: 8px 0; font-size: 14px;">Travelers</td>
-              <td style="color: #3D2B1F; text-align: right; font-size: 14px;">${booking.travelers}</td>
+              <td style="color: #3D2B1F; text-align: right; font-size: 14px;">${escapeHtml(booking.travelers)}</td>
             </tr>
             <tr style="border-top: 1px solid #E8E0D5;">
               <td style="color: #6B6158; padding: 12px 0 8px; font-size: 14px;">Deposit Paid</td>
@@ -123,7 +133,7 @@ export async function sendTravelerConfirmationEmail(booking, amountPaid, balance
         </ol>
 
         <div style="text-align: center; margin: 40px 0;">
-          <a href="https://wa.me/254718592358?text=Hi, my booking ref is ${booking.ref}" style="background: #8B6914; color: white; padding: 16px 32px; text-decoration: none; font-size: 15px; border-radius: 2px; letter-spacing: 0.05em;">WHATSAPP YOUR GUIDE TEAM</a>
+          <a href="https://wa.me/254718592358?text=Hi, my booking ref is ${encodeURIComponent(booking.ref)}" style="background: #8B6914; color: white; padding: 16px 32px; text-decoration: none; font-size: 15px; border-radius: 2px; letter-spacing: 0.05em;">WHATSAPP YOUR GUIDE TEAM</a>
         </div>
 
         <p style="color: #9B9189; font-size: 13px; border-top: 1px solid #E8E0D5; padding-top: 24px; margin-top: 40px;">
@@ -141,7 +151,7 @@ export async function sendPaymentFailedEmail(booking) {
   await sendEmail({
     to: booking.travelerEmail,
     subject: `⚠️ Payment Action Required — ${booking.ref} | Savanna & Beyond`,
-    html: `<p>Dear ${booking.travelerName}, we were unable to process your payment for booking ${booking.ref}. Please try again or contact us for assistance.</p>`
+    html: `<p>Dear ${escapeHtml(booking.travelerName)}, we were unable to process your payment for booking ${escapeHtml(booking.ref)}. Please try again or contact us for assistance.</p>`
   });
 }
 
@@ -151,9 +161,9 @@ export async function sendPaymentFailedEmail(booking) {
 
 export async function sendAdminAlert(booking, amountPaid, isFraud = false) {
   const expectedDeposit = (booking.totalAmount || booking.totalAmountUSD || 0) * 0.3;
-  const adminMessage = isFraud 
-    ? `🚨 *SECURITY ALERT: POSSIBLE FRAUD* 🚨\n\n*Amount Manipulation Attempt Detected via External Tool (e.g. Burp Suite)!*\n\n*Ref:* ${booking.ref}\n*Guest:* ${booking.travelerName}\n*Amount Captured:* $${amountPaid} USD\n*Required Deposit:* $${expectedDeposit.toFixed(2)} USD\n\n⚠️ *Action:* Do NOT confirm this booking. Verify the transaction in the PayPal dashboard immediately.`
-    : `💰 *NEW PAYMENT RECEIVED*\n\n*Ref:* ${booking.ref}\n*Guest:* ${booking.travelerName}\n*Package:* ${booking.packageName}\n*Travel date:* ${formatDate(booking.travelDate)}\n*Amount paid:* $${amountPaid} USD (PayPal)\n*Traveler email:* ${booking.travelerEmail}\n\nAction required: Send itinerary within 24 hours.\nDashboard: https://savannabeyond.co.ke/admin/bookings/${booking.ref}`;
+  const adminMessage = isFraud
+    ? `🚨 *SECURITY ALERT: POSSIBLE FRAUD* 🚨\n\n*Amount Manipulation Attempt Detected!*\n\n*Ref:* ${escapeHtml(booking.ref)}\n*Guest:* ${escapeHtml(booking.travelerName)}\n*Amount Captured:* $${escapeHtml(amountPaid)} USD\n*Required Deposit:* $${expectedDeposit.toFixed(2)} USD\n\n⚠️ *Action:* Do NOT confirm this booking. Verify the transaction in the PayPal dashboard immediately.`
+    : `💰 *NEW PAYMENT RECEIVED*\n\n*Ref:* ${escapeHtml(booking.ref)}\n*Guest:* ${escapeHtml(booking.travelerName)}\n*Package:* ${escapeHtml(booking.packageName)}\n*Travel date:* ${formatDate(booking.travelDate)}\n*Amount paid:* $${escapeHtml(amountPaid)} USD (PayPal)\n*Traveler email:* ${escapeHtml(booking.travelerEmail)}\n\nAction required: Send itinerary within 24 hours.`;
 
   await sendEmail({
     to: 'expeditions@savannabeyond.co.ke',

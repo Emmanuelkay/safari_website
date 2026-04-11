@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Phone } from 'lucide-react';
 import { CheckoutModal } from './CheckoutModal';
 import { useTranslation } from 'react-i18next';
+import { db } from '../lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 
 export const EnquiryEngine = () => {
@@ -17,6 +19,7 @@ export const EnquiryEngine = () => {
   });
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 
@@ -176,9 +179,10 @@ export const EnquiryEngine = () => {
 
                  <div>
                   <label className="block text-[11px] uppercase tracking-widest text-sand font-bold mb-3">{t('enquiry.form.message')}</label>
-                  <textarea 
-                    rows="4" 
-                    placeholder={t('enquiry.form.messagePlaceholder')} 
+                  <textarea
+                    rows="4"
+                    maxLength={2000}
+                    placeholder={t('enquiry.form.messagePlaceholder')}
                     value={formData.message}
                     onChange={(e) => handleInputChange('message', e.target.value)}
                     className="w-full bg-white/5 border border-white/10 rounded-[4px] p-4 text-white placeholder:text-zinc-500 focus:border-ochre focus:outline-none transition-all" 
@@ -188,13 +192,29 @@ export const EnquiryEngine = () => {
                  <div className="flex flex-col gap-4">
                   <button 
                     type="button"
-                    onClick={() => {
+                    disabled={submitting}
+                    onClick={async () => {
+                      if (!formData.name || !formData.email || !formData.phone) {
+                        alert(t('booking.alerts.fillDetails'));
+                        return;
+                      }
                       if (!isValidEmail(formData.email)) {
                         alert(t('booking.alerts.invalidEmail'));
                         return;
                       }
-                      // For now, general enquiry just shows success if it's not going to PayPal
-                      setIsSuccess(true);
+                      setSubmitting(true);
+                      try {
+                        await addDoc(collection(db, "enquiries"), {
+                          ...formData,
+                          status: 'NEW',
+                          createdAt: serverTimestamp(),
+                        });
+                        setIsSuccess(true);
+                      } catch {
+                        alert(t('booking.alerts.error') || 'Something went wrong. Please try again.');
+                      } finally {
+                        setSubmitting(false);
+                      }
                     }}
                     className="btn-ochre w-full py-5 text-base uppercase tracking-widest font-bold"
                   >

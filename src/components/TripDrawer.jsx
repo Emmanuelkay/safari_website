@@ -44,7 +44,7 @@ export const TripDrawer = () => {
               <div className="p-10 flex flex-col h-full bg-ivory/20">
                 <div className="flex justify-between items-center mb-10">
                   <h3 className="font-heading text-3xl text-charcoal tracking-tight">My Trip</h3>
-                  <button onClick={() => setShowDrawer(false)} className="text-zinc-300 hover:text-charcoal transition-colors">
+                  <button onClick={() => setShowDrawer(false)} aria-label="Close trip drawer" className="text-zinc-300 hover:text-charcoal transition-colors">
                     <X size={20} />
                   </button>
                 </div>
@@ -58,7 +58,7 @@ export const TripDrawer = () => {
                         <h4 className="font-heading text-xl text-charcoal mb-1">{trip.package.title}</h4>
                         <div className="flex justify-between items-center text-[12px] text-charcoal/50">
                           <span>${trip.package.price} pp</span>
-                          <button onClick={() => selectPackage(null)} className="opacity-0 group-hover:opacity-100 text-earth transition-opacity">
+                          <button onClick={() => selectPackage(null)} aria-label="Remove package" className="opacity-0 group-hover:opacity-100 text-earth transition-opacity">
                             <Trash2 size={14} />
                           </button>
                         </div>
@@ -75,7 +75,7 @@ export const TripDrawer = () => {
                           <div key={a.id} className="group relative">
                             <div className="flex justify-between items-start">
                               <h5 className="text-[13px] font-medium text-charcoal pr-4">✓ {a.name}</h5>
-                              <button onClick={() => toggleAddon(a)} className="opacity-0 group-hover:opacity-100 text-earth transition-opacity flex-shrink-0">
+                              <button onClick={() => toggleAddon(a)} aria-label={`Remove ${a.name}`} className="opacity-0 group-hover:opacity-100 text-earth transition-opacity flex-shrink-0">
                                 <Trash2 size={14} />
                               </button>
                             </div>
@@ -144,24 +144,13 @@ export const TripDrawer = () => {
       {!showDrawer && hasItems && (
         <button 
           onClick={() => setShowDrawer(true)}
+          aria-label="Open trip summary"
           className="lg:block hidden fixed bottom-8 right-8 bg-charcoal text-ivory p-6 rounded-full shadow-2xl hover:bg-gold hover:text-charcoal transition-all z-[90] scale-100 opacity-100"
         >
           <ShoppingBag size={24} />
         </button>
       )}
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #C5A059;
-          border-radius: 10px;
-        }
-      `}} />
     </>
   );
 };

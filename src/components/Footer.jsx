@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Camera, Globe, Share2 } from 'lucide-react';
+import { Mail, Phone, MapPin, MessageCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export const Footer = () => {
@@ -56,13 +56,18 @@ export const Footer = () => {
             </div>
           </div>
 
-          {/* Social */}
+          {/* Connect */}
           <div className="lg:col-span-2">
             <h4 className="text-gold font-bold uppercase text-[11px] tracking-[0.3em] mb-10">{t('footer.journal')}</h4>
-            <div className="flex gap-6 text-ivory/40">
-              <a href="#" className="hover:text-gold transition-colors"><Camera size={20} /></a>
-              <a href="#" className="hover:text-gold transition-colors"><Globe size={20} /></a>
-              <a href="#" className="hover:text-gold transition-colors"><Share2 size={20} /></a>
+            <div className="space-y-6">
+              <a href="https://wa.me/254718592358" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-ivory/40 hover:text-gold transition-colors text-[13px] font-body">
+                <MessageCircle size={18} />
+                <span>WhatsApp</span>
+              </a>
+              <a href="mailto:expeditions@savannabeyond.co.ke" className="flex items-center gap-3 text-ivory/40 hover:text-gold transition-colors text-[13px] font-body">
+                <Mail size={18} />
+                <span>Email Us</span>
+              </a>
             </div>
           </div>
 
@@ -72,9 +77,9 @@ export const Footer = () => {
         <div className="mt-32 pt-12 border-t border-ivory/5 flex flex-col md:flex-row justify-between items-center gap-8 text-[10px] font-bold uppercase tracking-widest text-ivory/20">
           <p>{t('footer.copyright')}</p>
           <div className="flex gap-10">
-            <a href="#" className="hover:text-ivory transition-colors">{t('footer.terms')}</a>
-            <a href="#" className="hover:text-ivory transition-colors">{t('footer.privacy')}</a>
-            <a href="#" className="hover:text-ivory transition-colors">{t('footer.sitemap')}</a>
+            <a href="/terms" className="hover:text-ivory transition-colors">{t('footer.terms')}</a>
+            <a href="/privacy" className="hover:text-ivory transition-colors">{t('footer.privacy')}</a>
+            <a href="/sitemap.xml" className="hover:text-ivory transition-colors">{t('footer.sitemap')}</a>
           </div>
         </div>
       </div>

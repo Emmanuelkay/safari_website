@@ -20,7 +20,7 @@
     @apply bg-ivory text-charcoal font-body antialiased;
   }
   
-  h1, h2, h2, h4, h5, h6 {
+  h1, h2, h3, h4, h5, h6 {
     @apply font-heading;
   }
 }
@@ -96,4 +96,58 @@
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
   }
+}
+
+/* Hero marquee animation */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  display: flex;
+  animation: marquee 20s linear infinite;
+}
+@media (min-width: 768px) {
+  .animate-marquee {
+    animation: none;
+  }
+}
+
+/* SocialProof scroll animation */
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(-382px * 5)); }
+}
+@media (min-width: 768px) {
+  @keyframes scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(calc(-482px * 5)); }
+  }
+}
+.animate-scroll {
+  animation: scroll 40s linear infinite;
+}
+.pause-animation:hover {
+  animation-play-state: paused;
+}
+
+/* Custom scrollbar for drawers */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #C5A059;
+  border-radius: 10px;
+}
+
+/* Scrollbar hide for horizontal scroll areas */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

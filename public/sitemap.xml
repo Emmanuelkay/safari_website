@@ -10,6 +10,7 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://savannabeyond.co.ke/?lang=fr"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://savannabeyond.co.ke/?lang=es"/>
     <xhtml:link rel="alternate" hreflang="zh" href="https://savannabeyond.co.ke/?lang=zh"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://savannabeyond.co.ke/?lang=ru"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://savannabeyond.co.ke/"/>
   </url>
   <url>
@@ -22,6 +23,17 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://savannabeyond.co.ke/about?lang=fr"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://savannabeyond.co.ke/about?lang=es"/>
     <xhtml:link rel="alternate" hreflang="zh" href="https://savannabeyond.co.ke/about?lang=zh"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://savannabeyond.co.ke/about?lang=ru"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://savannabeyond.co.ke/about"/>
+  </url>
+  <url>
+    <loc>https://savannabeyond.co.ke/privacy</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://savannabeyond.co.ke/terms</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
 </urlset>

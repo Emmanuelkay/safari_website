@@ -2,19 +2,20 @@ import { initializeApp } from "firebase/app";
 import { getFunctions } from "firebase/functions";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { getStorage } from "firebase/storage";
 
-// TODO: Replace with your project's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyAc49UcUp86fqOZkX2cyJy33bJi6pOxFqI",
-  authDomain: "safari-web-2026-10649.firebaseapp.com",
-  projectId: "safari-web-2026-10649",
-  storageBucket: "safari-web-2026-10649.firebasestorage.app",
-  messagingSenderId: "255346497800",
-  appId: "1:255346497800:web:6b91aba6106fd668b2f4bd",
-  measurementId: "G-NPYHYZTXR5"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 const app = initializeApp(firebaseConfig);
 export const functions = getFunctions(app);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+export const storage = getStorage(app);

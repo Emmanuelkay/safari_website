@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../../lib/firebase';
-import { collection, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import { db, functions } from '../../lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 import { cn } from '../../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -159,6 +160,7 @@ export const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const q = collection(db, "bookings");
@@ -171,12 +173,10 @@ export const AdminBookings = () => {
 
   const updateStatus = async (id, newStatus) => {
     try {
-      await updateDoc(doc(db, "bookings", id), { 
-        status: newStatus,
-        lastAdminAction: new Date().toISOString()
-      });
-    } catch (err) {
-      console.error(err);
+      const adminUpdate = httpsCallable(functions, 'adminUpdateBookingStatus');
+      await adminUpdate({ bookingId: id, newStatus });
+    } catch {
+      alert('Failed to update status. Please try again.');
     }
   };
 
@@ -195,7 +195,12 @@ export const AdminBookings = () => {
           <div className="flex gap-4">
             <div className="flex items-center bg-white border border-zinc-200 px-4 py-2 rounded-lg text-sm text-zinc-400">
               <Search size={16} />
-              <input placeholder="Search bookings..." className="bg-transparent border-none outline-none ml-2" />
+              <input
+                placeholder="Search bookings..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="bg-transparent border-none outline-none ml-2"
+              />
             </div>
             <button className="bg-white border border-zinc-200 p-3 rounded-lg text-zinc-400 hover:text-charcoal transition-colors">
               <Filter size={18} />
@@ -204,22 +209,34 @@ export const AdminBookings = () => {
         </div>
 
         <div className="flex gap-6 overflow-x-auto pb-10 min-h-[750px] custom-scrollbar">
-          {COLUMNS.map((col) => (
+          {COLUMNS.map((col) => {
+            const filtered = bookings.filter(b => {
+              if (b.status !== col.id) return false;
+              if (!searchTerm) return true;
+              const q = searchTerm.toLowerCase();
+              return (
+                (b.fullName || '').toLowerCase().includes(q) ||
+                (b.ref || '').toLowerCase().includes(q) ||
+                (b.email || '').toLowerCase().includes(q) ||
+                (b.packageName || '').toLowerCase().includes(q)
+              );
+            });
+
+            return (
             <div key={col.id} className="flex-shrink-0 w-80 flex flex-col gap-6">
               <div className="flex items-center justify-between px-2">
                 <div className="flex items-center gap-3">
                   <div className={cn("w-2 h-2 rounded-full", col.color)} />
                   <h3 className="font-bold text-[11px] uppercase tracking-[0.2em] text-charcoal/60">{col.label}</h3>
                   <span className="bg-zinc-100 text-zinc-500 px-2 py-0.5 rounded text-[10px] font-bold">
-                    {bookings.filter(b => b.status === col.id).length}
+                    {filtered.length}
                   </span>
                 </div>
-                <button className="text-zinc-300 hover:text-zinc-500"><Plus size={16} /></button>
+                <button aria-label="Add booking" className="text-zinc-300 hover:text-zinc-500"><Plus size={16} /></button>
               </div>
 
               <div className="flex-grow space-y-4">
-                {bookings
-                  .filter(b => b.status === col.id)
+                {filtered
                   .map((booking) => (
                     <div 
                       key={booking.id} 
@@ -271,7 +288,8 @@ export const AdminBookings = () => {
                   ))}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

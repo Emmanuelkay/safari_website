@@ -1,22 +1,16 @@
 import React from 'react';
-import { Camera, Waves, Hotel, Smartphone, Wind, Shield, Rocket, Moon, Check, Plus, ArrowRight } from 'lucide-react';
+import { Waves, Smartphone, Shield, Moon, Check } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useTrip } from '../context/TripContext';
 import { useTranslation } from 'react-i18next';
+import { useAddons } from '../hooks/usePackages';
 
-const signatureAddons = [
-  { id: 'balloon', image: "/pkg_mara_weekend.png", price: 480, unit: "pp" },
-  { id: 'heli', image: "/dest_naivasha.png", price: 1250, unit: "pp" },
-  { id: 'photo', image: "/wildlife_leopard.png", price: 180, unit: "pp" },
-  { id: 'dinner', image: "/dest_mara.png", price: 85, unit: "pp" },
-];
-
-const practicalAddons = [
-  { id: 'village', icon: <Shield size={20} />, price: 25, unit: "pp" },
-  { id: 'boat', icon: <Waves size={20} />, price: 35, unit: "pp" },
-  { id: 'hotel', icon: <Moon size={20} />, price: 95, unit: "pp" },
-  { id: 'sim', icon: <Smartphone size={20} />, price: 20, unit: "pack" },
-];
+const practicalIcons = {
+  village: <Shield size={20} />,
+  boat: <Waves size={20} />,
+  hotel: <Moon size={20} />,
+  sim: <Smartphone size={20} />,
+};
 
 const SignatureCard = ({ addon, isSelected, onToggle }) => {
   const { t } = useTranslation();
@@ -29,7 +23,10 @@ const SignatureCard = ({ addon, isSelected, onToggle }) => {
       <div className="relative h-[280px] overflow-hidden bg-charcoal">
         <img 
           src={addon.image} 
-          alt={name} 
+          alt={name}
+          loading="lazy"
+          width={400}
+          height={280}
           className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-110 transition-all duration-1000"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />
@@ -109,6 +106,8 @@ const PracticalCard = ({ addon, isSelected, onToggle }) => {
 export const AddOns = () => {
   const { t } = useTranslation();
   const { trip, toggleAddon } = useTrip();
+  const { signature: signatureAddons, practical: practicalAddonsData } = useAddons();
+  const practicalAddons = practicalAddonsData.map(a => ({ ...a, icon: practicalIcons[a.id] }));
 
   return (
     <section id="addons" className="py-32 bg-ivory bg-grain">

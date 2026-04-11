@@ -3,14 +3,14 @@ import { cn } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
 
 const animals = [
-  { id: 1, rarity: 2, image: "/wildlife_lion.png" },
-  { id: 2, rarity: 4, image: "/wildlife_leopard.png" },
-  { id: 3, rarity: 1, image: "/wildlife_elephant.png" },
-  { id: 4, rarity: 5, image: "/wildlife_rhino.png" },
-  { id: 5, rarity: 2, image: "/wildlife_buffalo.png" },
-  { id: 6, rarity: 4, image: "/wildlife_cheetah.png" },
-  { id: 7, rarity: 1, image: "/wildlife_wildebeest.png" },
-  { id: 8, rarity: 3, image: "/wildlife_giraffe.png" },
+  { id: 1, rarity: 2, image: "/wildlife_lion.webp" },
+  { id: 2, rarity: 4, image: "/wildlife_leopard.webp" },
+  { id: 3, rarity: 1, image: "/wildlife_elephant.webp" },
+  { id: 4, rarity: 5, image: "/wildlife_rhino.webp" },
+  { id: 5, rarity: 2, image: "/wildlife_buffalo.webp" },
+  { id: 6, rarity: 4, image: "/wildlife_cheetah.webp" },
+  { id: 7, rarity: 1, image: "/wildlife_wildebeest.webp" },
+  { id: 8, rarity: 3, image: "/wildlife_giraffe.webp" },
 ];
 
 const RarityDots = ({ count }) => (
@@ -31,7 +31,7 @@ export const WildlifeTracker = () => {
   const { t } = useTranslation();
 
   return (
-    <section className="py-32 bg-ivory overflow-hidden">
+    <section className="py-32 bg-white overflow-hidden">
       <div className="max-w-[1440px] mx-auto px-10">
         <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
           <div className="max-w-2xl">
@@ -52,10 +52,12 @@ export const WildlifeTracker = () => {
             return (
               <div key={idx} className="bg-ivory p-12 hover:bg-white transition-colors duration-500 group relative">
                 <div className="mb-10 relative w-32 h-32 rounded-full overflow-hidden border border-gold/10 group-hover:border-gold transition-colors duration-700 mx-auto md:mx-0">
-                  <img 
-                    src={animal.image} 
+                  <img
+                    src={animal.image}
                     alt={name}
                     loading="lazy"
+                    width={128}
+                    height={128}
                     className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-1000 scale-110 group-hover:scale-100"
                   />
                 </div>

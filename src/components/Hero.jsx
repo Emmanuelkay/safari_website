@@ -27,7 +27,7 @@ export const Hero = () => {
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-300 ease-out"
         style={{ 
-          backgroundImage: 'url("/hero_bg.png")',
+          backgroundImage: 'url("/hero_bg.webp")',
           transform: `translateY(${scrollY * 0.4}px) scale(1.1)`,
         }}
       />
@@ -37,11 +37,11 @@ export const Hero = () => {
 
       {/* Hero Content */}
       <div className="relative z-20 container-custom text-center pt-20">
-        <span className="text-gold font-body text-[11px] md:text-[13px] font-bold uppercase tracking-[0.6em] mb-8 block animate-in fade-in slide-in-from-bottom-4 duration-1500 text-center">
+        <span className="text-gold font-body text-[11px] md:text-[13px] font-bold uppercase tracking-[0.4em] mb-8 block animate-in fade-in slide-in-from-bottom-4 duration-1500 text-center">
           {t('hero.subtitle')}
         </span>
         
-        <h1 className="text-7xl md:text-9xl lg:text-[10rem] font-heading text-ivory mb-10 leading-[0.8] animate-in fade-in slide-in-from-bottom-6 duration-1500 delay-300">
+        <h1 className="text-7xl md:text-9xl lg:text-[10rem] font-heading text-ivory mb-10 leading-[0.9] animate-in fade-in slide-in-from-bottom-6 duration-1500 delay-300">
           {t('hero.title1')} <br />
           <span className="italic font-light opacity-90">{t('hero.title2')}</span>
         </h1>
@@ -59,7 +59,7 @@ export const Hero = () => {
             href="https://wa.me/254718592358" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="w-full sm:w-auto border border-ivory/30 bg-white/5 backdrop-blur-md text-ivory px-14 py-6 rounded-custom font-bold uppercase tracking-[0.3em] text-[12px] transition-all hover:bg-ivory/10 hover:border-ivory flex items-center justify-center gap-3"
+            className="w-full sm:w-auto border border-ivory/30 bg-white/15 backdrop-blur-md text-ivory px-14 py-6 rounded-custom font-bold uppercase tracking-[0.3em] text-[12px] transition-all hover:bg-ivory/20 hover:border-ivory flex items-center justify-center gap-3"
           >
             {t('hero.whatsapp')}
           </a>
@@ -81,21 +81,6 @@ export const Hero = () => {
         </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .animate-marquee {
-          display: flex;
-          animation: marquee 20s linear infinite;
-        }
-        @media (min-width: 768px) {
-          .animate-marquee {
-            animation: none;
-          }
-        }
-      `}} />
     </section>
   );
 };

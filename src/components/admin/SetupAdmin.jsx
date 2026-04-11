@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth } from '../../lib/firebase';
+import { auth, db } from '../../lib/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { Mail, Lock, UserPlus, ShieldCheck, ArrowRight } from 'lucide-react';
+import { collection, getDocs, limit, query } from 'firebase/firestore';
+import { Mail, Lock, UserPlus, ShieldCheck, ArrowRight, AlertCircle } from 'lucide-react';
 import { cn } from '../../lib/utils';
+
+const ALLOWED_ADMIN_DOMAIN = 'savannabeyond.co.ke';
 
 export const SetupAdmin = () => {
   const [email, setEmail] = useState('');
@@ -11,22 +14,88 @@ export const SetupAdmin = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [blocked, setBlocked] = useState(false);
+  const [checking, setChecking] = useState(true);
   const navigate = useNavigate();
+
+  // Check if an admin already exists — if so, block setup
+  useEffect(() => {
+    const checkExistingAdmin = async () => {
+      try {
+        // We check if there are already any authenticated-user-created bookings
+        // or if the current auth state shows existing users
+        // The simplest approach: if this page was already used successfully,
+        // block further access by checking a Firestore flag
+        const q = query(collection(db, '_admin_setup'), limit(1));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          setBlocked(true);
+        }
+      } catch {
+        // If we can't read (rules deny it), admin likely exists
+        setBlocked(true);
+      } finally {
+        setChecking(false);
+      }
+    };
+    checkExistingAdmin();
+  }, []);
 
   const handleSetup = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Restrict to company email domain
+    if (!email.endsWith(`@${ALLOWED_ADMIN_DOMAIN}`)) {
+      setError(`Admin accounts must use a @${ALLOWED_ADMIN_DOMAIN} email address.`);
+      return;
+    }
+
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
+
     setLoading(true);
     try {
       await createUserWithEmailAndPassword(auth, email, password);
       setSuccess(true);
     } catch (err) {
       setError(err.message || 'Failed to initialize administrative account.');
-      console.error(err);
     } finally {
       setLoading(false);
     }
   };
+
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-charcoal flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-gold/20 border-t-gold rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (blocked) {
+    return (
+      <div className="min-h-screen bg-charcoal flex items-center justify-center p-6 text-center">
+        <div className="w-full max-w-md bg-white p-12 rounded-custom shadow-2xl">
+          <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-8">
+            <AlertCircle className="w-10 h-10 text-red-500" />
+          </div>
+          <h2 className="text-3xl font-heading text-charcoal mb-4">Setup Unavailable</h2>
+          <p className="text-zinc-500 mb-10 text-sm leading-relaxed">
+            An admin account has already been created. Contact your team if you need access.
+          </p>
+          <button
+            onClick={() => navigate('/admin/login')}
+            className="w-full bg-charcoal text-ivory py-5 rounded-custom font-bold uppercase tracking-[0.3em] text-[12px] flex items-center justify-center gap-3"
+          >
+            Go to Login <ArrowRight size={18} />
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (success) {
     return (

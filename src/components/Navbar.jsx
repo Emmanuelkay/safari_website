@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLangOpen, setIsLangOpen] = useState(false);
   const { t, i18n } = useTranslation();
 
   useEffect(() => {
@@ -15,6 +16,17 @@ export const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (isMenuOpen) setIsMenuOpen(false);
+        if (isLangOpen) setIsLangOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isMenuOpen, isLangOpen]);
 
   const navLinks = [
     { name: t('nav.safaris'), href: '/#packages' },
@@ -29,11 +41,12 @@ export const Navbar = () => {
     { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
     { code: 'fr', name: 'Français', flag: '🇫🇷' },
     { code: 'es', name: 'Español', flag: '🇪🇸' },
-    { code: 'zh', name: '中文', flag: '🇨🇳' }
+    { code: 'zh', name: '中文', flag: '🇨🇳' },
+    { code: 'ru', name: 'Русский', flag: '🇷🇺' }
   ];
 
   return (
-    <nav className={cn(
+    <nav aria-label="Main navigation" className={cn(
       "fixed top-0 w-full z-50 transition-all duration-700 px-10 py-6 flex justify-between items-center",
       isScrolled ? "bg-white/90 backdrop-blur-md border-b border-gold/10 py-4 shadow-sm" : "bg-transparent"
     )}>
@@ -60,27 +73,40 @@ export const Navbar = () => {
           </a>
         ))}
 
-        <div className="relative group mx-2">
-          <button className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] transition-all hover:text-gold">
+        <div className="relative mx-2">
+          <button
+            onClick={() => setIsLangOpen(!isLangOpen)}
+            aria-expanded={isLangOpen}
+            aria-haspopup="listbox"
+            aria-label="Select language"
+            className={cn(
+              "flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] transition-all hover:text-gold",
+              isScrolled ? "text-charcoal/60" : "text-ivory/80"
+            )}
+          >
             <span className="text-sm">{languages.find(l => l.code === i18n.language)?.flag || '🇬🇧'}</span>
             <span>{languages.find(l => l.code === i18n.language)?.code || 'en'}</span>
           </button>
-          
-          <div className="absolute top-full right-0 mt-2 w-40 bg-charcoal/95 backdrop-blur-md border border-gold/20 rounded-custom opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col overflow-hidden shadow-2xl">
-            {languages.map((lng) => (
-              <button
-                key={lng.code}
-                onClick={() => i18n.changeLanguage(lng.code)}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-3 text-left text-xs font-bold uppercase tracking-wider transition-colors hover:bg-gold/10",
-                  i18n.language === lng.code ? "text-gold bg-gold/5" : "text-ivory/80"
-                )}
-              >
-                <span className="text-lg">{lng.flag}</span>
-                <span>{lng.name}</span>
-              </button>
-            ))}
-          </div>
+
+          {isLangOpen && (
+            <div role="listbox" className="absolute top-full right-0 mt-2 w-40 bg-charcoal/95 backdrop-blur-md border border-gold/20 rounded-custom flex flex-col overflow-hidden shadow-2xl">
+              {languages.map((lng) => (
+                <button
+                  key={lng.code}
+                  role="option"
+                  aria-selected={i18n.language === lng.code}
+                  onClick={() => { i18n.changeLanguage(lng.code); setIsLangOpen(false); }}
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-3 text-left text-xs font-bold uppercase tracking-wider transition-colors hover:bg-gold/10",
+                    i18n.language === lng.code ? "text-gold bg-gold/5" : "text-ivory/80"
+                  )}
+                >
+                  <span className="text-lg">{lng.flag}</span>
+                  <span>{lng.name}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         
         <a 
@@ -97,8 +123,11 @@ export const Navbar = () => {
       </div>
 
       {/* Mobile Toggle */}
-      <button 
+      <button
         onClick={() => setIsMenuOpen(!isMenuOpen)}
+        aria-expanded={isMenuOpen}
+        aria-controls="mobile-menu"
+        aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
         className={cn(
           "md:hidden p-2 transition-colors",
           isScrolled ? "text-charcoal" : "text-ivory"
@@ -108,7 +137,12 @@ export const Navbar = () => {
       </button>
 
       {/* Mobile Menu Overlay */}
-      <div className={cn(
+      <div
+        id="mobile-menu"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation menu"
+        className={cn(
         "fixed inset-0 bg-charcoal z-[-1] flex flex-col items-center justify-center gap-6 transition-all duration-500 md:hidden",
         isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       )}>

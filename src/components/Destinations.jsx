@@ -4,12 +4,12 @@ import { Compass } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const destinations = [
-  { id: 1, image: "/dest_mara.png" },
-  { id: 2, image: "/dest_amboseli.png" },
-  { id: 3, image: "/dest_naivasha.png" },
-  { id: 4, image: "/dest_samburu.png" },
-  { id: 5, image: "/dest_watamu.png" },
-  { id: 6, image: "/dest_nairobi.png" },
+  { id: 1, image: "/dest_mara.webp" },
+  { id: 2, image: "/dest_amboseli.webp" },
+  { id: 3, image: "/dest_naivasha.webp" },
+  { id: 4, image: "/dest_samburu.webp" },
+  { id: 5, image: "/dest_watamu.webp" },
+  { id: 6, image: "/dest_nairobi.webp" },
 ];
 
 export const Destinations = () => {
@@ -40,10 +40,12 @@ export const Destinations = () => {
                 key={idx} 
                 className="relative min-w-[300px] md:min-w-0 aspect-[4/5] rounded-custom overflow-hidden group shadow-2xl snap-center"
               >
-                <img 
-                  src={dest.image} 
+                <img
+                  src={dest.image}
                   alt={name}
                   loading="lazy"
+                  width={400}
+                  height={500}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-linear-to-b from-black/10 via-transparent to-black/80 opacity-80 group-hover:opacity-60 transition-opacity z-10" />
@@ -58,15 +60,6 @@ export const Destinations = () => {
         </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}} />
     </section>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 
@@ -10,8 +10,9 @@ const GuideCard = ({ id, guide, onOpenBio }) => {
     james: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=400",
     klaus: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400",
     amara: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400",
-    allan: "/guides/allan.png",
-    wei: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400"
+    allan: "/guides/allan.webp",
+    wei: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400",
+    nikolai: "/guides/nikolai.webp"
   };
 
   const flagEmojis = {
@@ -19,7 +20,8 @@ const GuideCard = ({ id, guide, onOpenBio }) => {
     German: "🇩🇪",
     French: "🇫🇷",
     Spanish: "🇪🇸",
-    Mandarin: "🇨🇳"
+    Mandarin: "🇨🇳",
+    Russian: "🇷🇺"
   };
 
   return (
@@ -35,6 +37,9 @@ const GuideCard = ({ id, guide, onOpenBio }) => {
           <img 
             src={placeholderImages[id] || "https://images.unsplash.com/photo-1633332755192-727a05c4013d?auto=format&fit=crop&q=80&w=400"} 
             alt={guide.name}
+            loading="lazy"
+            width={192}
+            height={192}
             className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-110 group-hover:scale-100"
           />
         </div>
@@ -65,7 +70,14 @@ export const Guides = () => {
   const { t } = useTranslation();
   const [selectedGuide, setSelectedGuide] = useState(null);
 
-  const guideIds = ['james', 'klaus', 'amara', 'allan', 'wei'];
+  useEffect(() => {
+    if (!selectedGuide) return;
+    const handleKey = (e) => { if (e.key === 'Escape') setSelectedGuide(null); };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [selectedGuide]);
+
+  const guideIds = ['james', 'klaus', 'amara', 'allan', 'wei', 'nikolai'];
   const guides = guideIds.map(id => ({
     id,
     ...t(`guides.team.${id}`, { returnObjects: true })
@@ -115,10 +127,11 @@ export const Guides = () => {
 
       {/* Bio Modal */}
       {selectedGuide && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-charcoal/95 backdrop-blur-md">
+        <div role="dialog" aria-modal="true" aria-label={`${selectedGuide.name} profile`} className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-charcoal/95 backdrop-blur-md">
           <div className="bg-[#1a1c18] border border-gold/20 max-w-2xl w-full relative p-10 md:p-16 animate-in fade-in zoom-in duration-300">
-            <button 
+            <button
               onClick={() => setSelectedGuide(null)}
+              aria-label="Close guide profile"
               className="absolute top-6 right-6 text-gold/40 hover:text-gold transition-colors"
             >
               <X size={24} />
@@ -132,11 +145,13 @@ export const Guides = () => {
                        james: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=400",
                        klaus: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400",
                        amara: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400",
-                       allan: "/guides/allan.png",
-                       wei: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400"
+                       allan: "/guides/allan.webp",
+                       wei: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400",
+                       nikolai: "/guides/nikolai.webp"
                      }[selectedGuide.id]
                    } 
                    alt={selectedGuide.name}
+                   loading="lazy"
                    className="w-full h-full object-cover"
                  />
               </div>
@@ -147,7 +162,7 @@ export const Guides = () => {
                   <div className="flex items-center gap-2 text-gold font-bold text-[10px] uppercase tracking-widest">
                     <span>{selectedGuide.lang}</span>
                     <span className="w-1 h-1 bg-gold/40 rounded-full" />
-                    <span>8+ Years Experience</span>
+                    <span>{t('guides.experience')}</span>
                   </div>
                 </div>
 
@@ -167,7 +182,7 @@ export const Guides = () => {
                     }}
                     className="bg-gold text-charcoal px-10 py-4 font-bold text-[11px] uppercase tracking-widest hover:bg-ivory transition-colors duration-300"
                   >
-                    Request {selectedGuide.name} for my trip
+                    {t('guides.requestGuide', { name: selectedGuide.name })}
                   </button>
                 </div>
               </div>
